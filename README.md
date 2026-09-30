@@ -124,7 +124,7 @@ The manager uses the web application to:
 
 The proposed system consists of three main parts:
 
-### Flutter Mobile Application
+### Flutter Mobile Application 
 
 The Flutter application is used by customers to:
 
