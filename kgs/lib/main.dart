@@ -28,7 +28,7 @@ class KatliApp extends StatelessWidget {
         scaffoldBackgroundColor: Colors.white,
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.redAccent),
       ),
-      home: const LoginScreen(), //
+      // home: const LoginScreen(), //
     );
   }
 }
