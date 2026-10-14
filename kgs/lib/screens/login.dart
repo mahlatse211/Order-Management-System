@@ -123,7 +123,7 @@ class _LoginScreenState extends State<LoginScreen> {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-          builder: (context) => const HomeScreen(),
+          builder: (context) => const LoginScreen(),
         ),
       );
     } on AuthException catch (e) {
@@ -167,7 +167,7 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Colors.blue,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(24.0),
@@ -283,7 +283,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               context,
                               MaterialPageRoute(
                                 builder: (context) =>
-                                    const SignupScreen(),
+                                    const LoginScreen(),
                               ),
                             );
                           },
