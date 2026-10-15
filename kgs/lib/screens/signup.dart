@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:kgs/screens/login.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'homeScreen.dart'; // Import your home screen file
+// Import your home screen file
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});

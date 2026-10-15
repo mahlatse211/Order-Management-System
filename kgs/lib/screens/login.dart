@@ -96,7 +96,8 @@ class _LoginScreenState extends State<LoginScreen> {
     final password = _passwordController.text;
 
     // Validate input fields
-    if (email.isEmpty || password.isEmpty) {
+    if (email.isEmpty || password.isEmpty) 
+    {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Please enter your email and password.'),
@@ -104,7 +105,27 @@ class _LoginScreenState extends State<LoginScreen> {
       );
       return;
     }
-
+    //Validate if only email is left empty
+    if (email.isEmpty) 
+    {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please enter your email.'),
+        ),
+      );
+      return;
+    }
+    //Validate if Passowrd only is empty
+if ( password.isEmpty) 
+{
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please enter your password.'),
+        ),
+      );
+      return;
+    }
+    
     setState(() {
       _isLoading = true;
     });
