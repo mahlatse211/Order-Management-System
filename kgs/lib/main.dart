@@ -46,7 +46,7 @@ Future<void> main() async {
   try {
     await Supabase.initialize(
       url: 'https://wypidtddvljsxldhbhab.supabase.co',
-      publishableKey: 'sb_publishable_xojKIstUVBMiXlqeGCw6Mg_3wUI4oNpY',
+      publishableKey: 'sb_publishable_xojKIstUVBMiXlqeGCw6Mg_3wUI4oNp'
     );
 
     runApp(const KatliApp());
