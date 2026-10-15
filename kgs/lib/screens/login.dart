@@ -76,7 +76,8 @@
 // // }
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import  'signup.dart';
+ import  'signup.dart';
+import'homeScreen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -303,7 +304,7 @@ if ( password.isEmpty)
                               context,
                               MaterialPageRoute(
                                 builder: (context) =>
-                                    const SignupScreen()
+                                    const RegistrationScreen()
                               ),
                             );
                           },
