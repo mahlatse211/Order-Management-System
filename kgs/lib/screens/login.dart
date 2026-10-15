@@ -303,7 +303,7 @@ if ( password.isEmpty)
                               context,
                               MaterialPageRoute(
                                 builder: (context) =>
-                                    const RegistrationScreen()
+                                    const SignupScreen()
                               ),
                             );
                           },
