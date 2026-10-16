@@ -77,6 +77,8 @@ import 'package:flutter/material.dart';
 // }
 
 //Gemini Suggestion
+import 'package:flutter/material.dart';
+import 'newOrder.dart';
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -278,24 +280,33 @@ class _HomeScreenState extends State<HomeScreen> {
                                 ),
                               ),
                               ElevatedButton(
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.black,
-                                  foregroundColor: Colors.white,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(20),
-                                  ),
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 16, vertical: 10),
-                                ),
-                                onPressed: () {},
-                                child: const Text(
-                                  'New Order',
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ),
+  style: ElevatedButton.styleFrom(
+    backgroundColor: Colors.black,
+    foregroundColor: Colors.white,
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(20),
+    ),
+    padding: const EdgeInsets.symmetric(
+      horizontal: 16,
+      vertical: 10,
+    ),
+  ),
+  onPressed: () {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const NewOrderScreen(),
+      ),
+    );
+  },
+  child: const Text(
+    'New Order',
+    style: TextStyle(
+      fontSize: 12,
+      fontWeight: FontWeight.bold,
+    ),
+  ),
+),
                             ],
                           ),
                         ),
