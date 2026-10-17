@@ -77,7 +77,6 @@ import 'package:flutter/material.dart';
 // }
 
 //Gemini Suggestion
-import 'package:flutter/material.dart';
 import 'newOrder.dart';
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
