@@ -21,25 +21,30 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
     setState(() => _isLoading = true);
     try {
       final user = Supabase.instance.client.auth.currentUser;
+
       await Supabase.instance.client.from('orders').insert({
-        //  'user_id': user?.id,
-        'service_id': _selectedService,
+        'order_id': user?.id, // Uncommented: links order to the logged-in user
+        'service_name': _selectedService, // Make sure your DB column accepts text, or change this to an ID
         'description': _titleController.text.trim(),
-        // 'quantity': int.parse(_qtyController.text),
-        // 'notes': _notesController.text.trim(),
+        // 'quantity': int.tryParse(_qtyController.text) ?? 1, // Uncommented & safe-parsed
+        // 'notes': _notesController.text.trim(), // Uncommented
         'status': 'Pending',
       });
 
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Order submitted successfully!')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Order submitted successfully!')),
+      );
       Navigator.pop(context);
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: $e')),
+      );
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
   }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -69,3 +74,31 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
     );
   }
 }
+
+//Gemini Suggestion
+
+
+
+  //Original Idea
+  // Future<void> _submitOrder() async {
+//     setState(() => _isLoading = true);
+//     try {
+//       final user = Supabase.instance.client.auth.currentUser;
+//       await Supabase.instance.client.from('orders').insert({
+//         //  'user_id': user?.id,
+//         'service_id': _selectedService,
+//         'description': _titleController.text.trim(),
+//         // 'quantity': int.parse(_qtyController.text),
+//         // 'notes': _notesController.text.trim(),
+//         'status': 'Pending',
+//       });
+
+//       if (!mounted) return;
+//       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Order submitted successfully!')));
+//       Navigator.pop(context);
+//     } catch (e) {
+//       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
+//     } finally {
+//       if (mounted) setState(() => _isLoading = false);
+//     }
+//   }
