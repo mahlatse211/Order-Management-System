@@ -13,6 +13,7 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
   final _titleController = TextEditingController();
   final _qtyController = TextEditingController(text: '1');
   final _notesController = TextEditingController();
+  final _budgetController=TextEditingController();
   bool _isLoading = false;
 
   final List<String> _services = ['0','Logo Design', 'Brand Design', 'Website Design', 'Event Promotion', 'Print Design', 'Digital Design'];
@@ -26,9 +27,8 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
         'order_id': user?.id, // Uncommented: links order to the logged-in user
         'service_name': _selectedService, // Make sure your DB column accepts text, or change this to an ID
         'description': _titleController.text.trim(),
-        // 'quantity': int.tryParse(_qtyController.text) ?? 1, // Uncommented & safe-parsed
-        // 'notes': _notesController.text.trim(), // Uncommented
-        'status': 'Pending',
+         'budget':_budgetController.text.trim(),
+         'status': 'Pending',
       });
 
       if (!mounted) return;
@@ -63,6 +63,16 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
           TextField(controller: _titleController, decoration: const InputDecoration(labelText: 'Order Title')),
           TextField(controller: _qtyController, keyboardType: TextInputType.number, decoration: const InputDecoration(labelText: 'Quantity')),
           TextField(controller: _notesController, maxLines: 3, decoration: const InputDecoration(labelText: 'Additional Notes')),
+          TextField(
+  controller: _budgetController,
+  keyboardType: TextInputType.number, // Opens the numeric keyboard on mobile
+  inputFormatters: [
+     // Restricts input to numbers (0-9) only
+  ],
+  decoration: const InputDecoration(
+    labelText: 'Enter Budget',
+  ),
+),
           const SizedBox(height: 25),
           ElevatedButton(
             style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent, padding: const EdgeInsets.all(15)),

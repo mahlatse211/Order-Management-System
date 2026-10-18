@@ -77,6 +77,7 @@ import 'package:flutter/material.dart';
 // }
 
 //Gemini Suggestion
+import 'package:kgs/models/serviceItem.dart';
 import 'newOrder.dart';
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -127,7 +128,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   IconButton(
                     padding: EdgeInsets.zero,
                     constraints: const BoxConstraints(),
-                    icon: const Icon(Icons.menu, color: Colors.white, size: 28),
+                    icon: const Icon(Icons.menu, color: Colors.black, size: 28),
                     onPressed: () {},
                   ),
                   const SizedBox(height: 16),
@@ -135,7 +136,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   const Text(
                     'Hello, Customer',
                     style: TextStyle(
-                      color: Colors.white,
+                      color: Colors.black,
                       fontSize: 26,
                       fontWeight: FontWeight.bold,
                     ),
@@ -144,7 +145,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   const Text(
                     'What would you like to do today?',
                     style: TextStyle(
-                      color: Colors.white70,
+                      color: Colors.black,
                       fontSize: 14,
                     ),
                   ),
@@ -349,14 +350,3 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 }
 
-class ServiceItem {
-  final String title;
-  final String price;
-  final String imagePath;
-
-  ServiceItem({
-    required this.title,
-    required this.price,
-    required this.imagePath,
-  });
-}
