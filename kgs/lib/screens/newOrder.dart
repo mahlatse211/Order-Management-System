@@ -24,7 +24,8 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
       final user = Supabase.instance.client.auth.currentUser;
 
       await Supabase.instance.client.from('orders').insert({
-        'order_id': user?.id, // Uncommented: links order to the logged-in user
+        // 'order_id': user.id, // Uncommented: links order to the logged-in user
+        'customer_id': user,
         'service_name': _selectedService, // Make sure your DB column accepts text, or change this to an ID
         'description': _titleController.text.trim(),
          'budget':_budgetController.text.trim(),
@@ -33,7 +34,9 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
 
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Order submitted successfully!')),
+        const SnackBar(content: Text('Order submitted successfully!'),
+         backgroundColor: Colors.green,)
+         ,
       );
       Navigator.pop(context);
     } catch (e) {
