@@ -247,6 +247,7 @@ class _SignupScreenState extends State<SignupScreen> {
       if (userId != null) {
         await Supabase.instance.client.from('customers').insert({
           // 'user_id': userId,
+          // 'auth_id': userId,
           'full_name': _nameController.text.trim(),
           'phone': _phoneController.text.trim(),
           'email': _emailController.text.trim(),

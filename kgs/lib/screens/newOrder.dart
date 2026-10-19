@@ -24,8 +24,8 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
       final user = Supabase.instance.client.auth.currentUser;
 
       await Supabase.instance.client.from('orders').insert({
-        // 'order_id': user.id, // Uncommented: links order to the logged-in user
-        'customer_id': user,
+          // 'customer_id': user?.id, // Uncommented: links order to the logged-in user
+        // 'customer_id': user,
         'service_name': _selectedService, // Make sure your DB column accepts text, or change this to an ID
         'description': _titleController.text.trim(),
          'budget':_budgetController.text.trim(),
@@ -87,7 +87,18 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
     );
   }
 }
+//Keep it here for now 
+// final user = Supabase.instance.client.auth.currentUser;
 
+//       await Supabase.instance.client.from('orders').insert({
+//           'customer_id': user?.id, // Uncommented: links order to the logged-in user
+//         // 'customer_id': user,
+//         'service_name': _selectedService, // Make sure your DB column accepts text, or change this to an ID
+//         'description': _titleController.text.trim(),
+//          'budget':_budgetController.text.trim(),
+//          'status': 'Pending',
+//       });
+//For Now
 //Gemini Suggestion
 
 
