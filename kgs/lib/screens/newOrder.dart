@@ -14,9 +14,10 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
   final _qtyController = TextEditingController(text: '1');
   final _notesController = TextEditingController();
   final _budgetController=TextEditingController();
+  //  final _deadlineController=TextEditingController();
   bool _isLoading = false;
 
-  final List<String> _services = ['0','Logo Design', 'Brand Design', 'Website Design', 'Event Promotion', 'Print Design', 'Digital Design'];
+  final List<String> _services = ['Logo Design', 'Brand Design', 'Website Design', 'Event Promotion', 'Print Design', 'Digital Design'];
 
   Future<void> _submitOrder() async {
     setState(() => _isLoading = true);
@@ -24,12 +25,13 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
       final user = Supabase.instance.client.auth.currentUser;
 
       await Supabase.instance.client.from('orders').insert({
-          // 'customer_id': user?.id, // Uncommented: links order to the logged-in user
+           'auth_id': user?.id, // Uncommented: links order to the logged-in user
         // 'customer_id': user,
         'service_name': _selectedService, // Make sure your DB column accepts text, or change this to an ID
         'description': _titleController.text.trim(),
          'budget':_budgetController.text.trim(),
          'status': 'Pending',
+        //  "deadline": _deadlineController.text.trim()
       });
 
       if (!mounted) return;
@@ -76,6 +78,8 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
     labelText: 'Enter Budget',
   ),
 ),
+// TextField(controller: _deadlineController, maxLines: 3, decoration: const InputDecoration(labelText: 'Deadline')),
+          
           const SizedBox(height: 25),
           ElevatedButton(
             style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent, padding: const EdgeInsets.all(15)),

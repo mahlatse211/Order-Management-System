@@ -97,7 +97,7 @@ class _HomeScreenState extends State<HomeScreen> {
       title: 'Logo Design',
       price: 'From R300',
       imagePath: 'assets/Logo2.jpeg', 
-      // const AssetImage('assets/logo.jpeg')
+     
     ),
     ServiceItem(
       title: 'Event Poster',
@@ -134,7 +134,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Katliey Graphics', style: TextStyle(color: Colors.white)),
-        backgroundColor: Colors.black,
+        backgroundColor: Colors.red,
       ),
       drawer: MyDrawer(
         onProfileTap: goToProfile,
@@ -148,31 +148,8 @@ class _HomeScreenState extends State<HomeScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Menu Icon
-                  IconButton(
-                    padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(),
-                    icon: const Icon(Icons.menu, color: Colors.black, size: 28),
-                    onPressed: () {},
-                  ),
-                  const SizedBox(height: 16),
-                  // Greeting
-                  const Text(
-                    'Hello, Customer',
-                    style: TextStyle(
-                      color: Colors.black,
-                      fontSize: 26,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  const Text(
-                    'What would you like to do today?',
-                    style: TextStyle(
-                      color: Colors.black,
-                      fontSize: 14,
-                    ),
-                  ),
+                  
+                  
                 ],
               ),
             ),

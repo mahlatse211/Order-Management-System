@@ -21,14 +21,23 @@ class _ProfilePageState extends State<ProfilePage> {
     }
     
     // Fetch the row from the 'customers' table where user_id matches
-    final response = await Supabase.instance.client
-        .from('customers')
-        .select()
-        .eq('user_id', currentUser!.id)
-        .single(); // .single() expects exactly one row
-        
+  // final userId = Supabase.auth.currentUser!.id;
+  final response = await Supabase.instance.client
+    .from('customers')
+    .select()
+    .eq('auth_id', currentUser!.id)
+    .single();
     return response;
   }
+
+  //   final response = await Supabase.instance.client
+  //       .from('customers')
+  //       .select()
+  //       .eq('id', currentUser!)
+  //       .single(); // .single() expects exactly one row
+        
+  //   return response;
+  // }
 
   Future<void> signOut() async {
     await Supabase.instance.client.auth.signOut();
