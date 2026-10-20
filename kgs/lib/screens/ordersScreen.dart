@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:kgs/screens/drawer.dart';
 import 'package:kgs/screens/homeScreen.dart';
 import 'package:kgs/screens/login.dart';
+import 'package:kgs/screens/profile.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class CurrentOrdersScreen extends StatefulWidget {
@@ -41,7 +42,7 @@ class _CurrentOrdersScreenState extends State<CurrentOrdersScreen> {
 
   void goToProfile() {
     // If we are already on profile page, just close the drawer
-    Navigator.pop(context); 
+    Navigator.push(context, MaterialPageRoute(builder: (context) => const ProfilePage(),)); 
   }
   void goToOrders() {
     // If we are already on orders page, just close the drawer
