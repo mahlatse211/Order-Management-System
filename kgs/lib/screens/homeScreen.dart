@@ -173,13 +173,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // Menu Icon
-                  IconButton(
-                    padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(),
-                    icon: const Icon(Icons.menu, color: Colors.black, size: 28),
-                    onPressed: () {},
-                  ),
-                  const SizedBox(height: 16),
+                 
                   // Greeting
                  
                 ],
