@@ -4,12 +4,16 @@ import 'package:kgs/components/list_tile.dart'; // Make sure this path is correc
 class MyDrawer extends StatelessWidget {
   final void Function()? onProfileTap;
   final void Function()? onSignout;
+  final void Function()? onViewOrdersTap;
+  final void Function()? onHomeTap;
 
   const MyDrawer({
     super.key, 
     required this.onProfileTap, 
-    required this.onSignout
-  });
+    required this.onSignout,
+    required this.onViewOrdersTap,
+    required this.onHomeTap,
+ });
 
   @override
   Widget build(BuildContext context) {
@@ -33,7 +37,7 @@ class MyDrawer extends StatelessWidget {
           MyListTile(
             icon: Icons.home, 
             text: 'HOME',
-            onTap: () => Navigator.pop(context), // Close drawer
+            onTap: onHomeTap, // Calls the function passed from HomeScreen
           ),
 
           MyListTile(
@@ -51,7 +55,7 @@ class MyDrawer extends StatelessWidget {
           MyListTile(
             icon: Icons.outbond_rounded, 
             text: 'VIEW ORDER',
-            onTap: () => Navigator.pop(context), // Close drawer
+            onTap: onViewOrdersTap, // Calls the function passed from HomeScreen
           ),
           ],
          ),
