@@ -93,22 +93,23 @@ class _HomeScreenState extends State<HomeScreen> {
     ServiceItem(
       title: 'Logo Design',
       price: 'From R300',
-      imagePath: 'assets/logo_design.png', // Replace with your asset path
+      imagePath: 'kgs/assets/Logo2.jpeg', 
+      // const AssetImage('assets/logo.jpeg')
     ),
     ServiceItem(
       title: 'Event Poster',
       price: 'From R800',
-      imagePath: 'assets/event_poster.png', // Replace with your asset path
+      imagePath: 'assets/Event poster.jpeg', 
     ),
     ServiceItem(
       title: 'Flyer',
       price: 'From R500',
-      imagePath: 'assets/flyer.png', // Replace with your asset path
+      imagePath: 'assets/Flyer.jpeg', // Replace with your asset path
     ),
     ServiceItem(
       title: 'Brand Design',
       price: 'From R800',
-      imagePath: 'assets/brand_design.png', // Replace with your asset path
+      imagePath: 'assets/Brand Design.png', // Replace with your asset path
     ),
   ];
 
