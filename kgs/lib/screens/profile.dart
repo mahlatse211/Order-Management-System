@@ -127,7 +127,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 _buildProfileItem(Icons.email, 'Email', email),
                 _buildProfileItem(Icons.phone, 'Phone Number', phone),
                 // You can also show the user ID for debugging
-                _buildProfileItem(Icons.fingerprint, 'User ID', currentUser!.id),
+                // _buildProfileItem(Icons.fingerprint, 'User ID', currentUser!.id),
               ],
             );
           }
