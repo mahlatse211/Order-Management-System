@@ -78,6 +78,9 @@ import 'package:flutter/material.dart';
 
 //Gemini Suggestion
 import 'package:kgs/models/serviceItem.dart';
+import 'package:kgs/screens/drawer.dart';
+import 'package:kgs/screens/profile.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'newOrder.dart';
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -111,10 +114,30 @@ class _HomeScreenState extends State<HomeScreen> {
       imagePath: 'assets/brand_design.png', // Replace with your asset path
     ),
   ];
+  void _signOut() async {
+    await Supabase.instance.client.auth.signOut();
+    if (mounted) {
+      Navigator.pushReplacementNamed(context, '/login');
+    }
+  }
+
+  void goToProfile() {
+    // If we are already on profile page, just close the drawer
+    Navigator.pop(context); 
+    // go to profile page
+    Navigator.push(context, MaterialPageRoute(builder: (context) => ProfilePage(),)); // Navigate to profile page
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: const Text('Katliey Graphics', style: TextStyle(color: Colors.white)),
+        backgroundColor: Colors.black,
+      ),
+      drawer: MyDrawer(
+        onProfileTap: goToProfile,
+        onSignout: _signOut,),
       body: SafeArea(
         child: Column(
           children: [
