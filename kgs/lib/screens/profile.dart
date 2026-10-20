@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:kgs/screens/homeScreen.dart';
+import 'package:kgs/screens/ordersScreen.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:kgs/screens/login.dart';
 import 'package:kgs/screens/drawer.dart'; // Ensure path is correct
@@ -44,6 +46,18 @@ class _ProfilePageState extends State<ProfilePage> {
     // If we are already on profile page, just close the drawer
     Navigator.pop(context); 
   }
+  void goToOrders() {
+    // If we are already on orders page, just close the drawer
+    Navigator.pop(context);
+    // go to orders page
+    Navigator.push(context, MaterialPageRoute(builder: (context) => const CurrentOrdersScreen(),)); // Navigate to orders page
+  }
+  void goToHome() {
+    // If we are already on home page, just close the drawer
+    Navigator.pop(context);
+    // go to home page
+    Navigator.push(context, MaterialPageRoute(builder: (context) => const HomeScreen(),)); // Navigate to home page
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -55,6 +69,8 @@ class _ProfilePageState extends State<ProfilePage> {
       drawer: MyDrawer(
         onProfileTap: goToProfile,
         onSignout: signOut,
+        onViewOrdersTap: goToOrders, // Navigate to orders page
+        onHomeTap: goToHome, // Navigate to home page
       ),
       // 3. Use FutureBuilder to wait for the database fetch
       body: FutureBuilder<Map<String, dynamic>>(

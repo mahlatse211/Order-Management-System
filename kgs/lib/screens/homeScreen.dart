@@ -79,6 +79,8 @@ import 'package:flutter/material.dart';
 //Gemini Suggestion
 import 'package:kgs/models/serviceItem.dart';
 import 'package:kgs/screens/drawer.dart';
+import 'package:kgs/screens/login.dart';
+import 'package:kgs/screens/ordersScreen.dart';
 import 'package:kgs/screens/profile.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'newOrder.dart';
@@ -115,10 +117,14 @@ class _HomeScreenState extends State<HomeScreen> {
       imagePath: 'assets/Brand Design.jpeg', // Replace with your asset path
     ),
   ];
-  void _signOut() async {
+
+   Future<void> signOut() async {
     await Supabase.instance.client.auth.signOut();
     if (mounted) {
-      Navigator.pushReplacementNamed(context, '/login');
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const LoginScreen()),
+      );
     }
   }
 
@@ -129,7 +135,21 @@ class _HomeScreenState extends State<HomeScreen> {
     Navigator.push(context, MaterialPageRoute(builder: (context) => ProfilePage(),)); // Navigate to profile page
   }
 
+  void goToOrders() {
+    // If we are already on orders page, just close the drawer
+    Navigator.pop(context);
+    // go to orders page
+    Navigator.push(context, MaterialPageRoute(builder: (context) => CurrentOrdersScreen(),)); // Navigate to orders page
+  }
+  void goToHome() {
+    // If we are already on home page, just close the drawer
+    Navigator.pop(context);
+    // go to home page
+    Navigator.push(context, MaterialPageRoute(builder: (context) => const HomeScreen(),)); // Navigate to home page
+  }
+
   @override
+
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -138,7 +158,11 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       drawer: MyDrawer(
         onProfileTap: goToProfile,
-        onSignout: _signOut,),
+        onSignout: signOut,
+        onViewOrdersTap: goToOrders, // Navigate to orders page
+        onHomeTap: goToHome, // Navigate to home page
+        ),
+
       body: SafeArea(
         child: Column(
           children: [
@@ -148,13 +172,7 @@ class _HomeScreenState extends State<HomeScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Menu Icon
-                  IconButton(
-                    padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(),
-                    icon: const Icon(Icons.menu, color: Colors.black, size: 28),
-                    onPressed: () {},
-                  ),
+                 
                   const SizedBox(height: 16),
                   // Greeting
                   const Text(
@@ -351,6 +369,7 @@ class _HomeScreenState extends State<HomeScreen> {
         unselectedItemColor: Colors.white70,
         currentIndex: _currentIndex,
         onTap: (index) {
+          
           setState(() {
             _currentIndex = index;
           });
