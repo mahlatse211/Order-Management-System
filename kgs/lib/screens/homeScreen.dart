@@ -93,7 +93,7 @@ class _HomeScreenState extends State<HomeScreen> {
     ServiceItem(
       title: 'Logo Design',
       price: 'From R300',
-      imagePath: 'kgs/assets/Logo2.jpeg', 
+      imagePath: 'assets/Logo2.jpeg', 
       // const AssetImage('assets/logo.jpeg')
     ),
     ServiceItem(
@@ -109,7 +109,7 @@ class _HomeScreenState extends State<HomeScreen> {
     ServiceItem(
       title: 'Brand Design',
       price: 'From R800',
-      imagePath: 'assets/Brand Design.png', // Replace with your asset path
+      imagePath: 'assets/Brand Design.jpeg', // Replace with your asset path
     ),
   ];
 

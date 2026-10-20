@@ -148,4 +148,9 @@ flutter:
   uses-material-design: true
 
   assets:
+    
     - assets/logo.jpeg
+    - assets/Logo2.jpeg
+    - assets/Brand Design.jpeg
+    - assets/Flyer.jpeg
+    - assets/Event Poster.jpeg
