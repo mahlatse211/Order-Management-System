@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:kgs/screens/drawer.dart';
+import 'package:kgs/screens/homeScreen.dart';
+import 'package:kgs/screens/login.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class CurrentOrdersScreen extends StatefulWidget {
@@ -26,6 +29,34 @@ class _CurrentOrdersScreenState extends State<CurrentOrdersScreen> {
     return List<Map<String, dynamic>>.from(response);
   }
 
+  Future<void> signOut() async {
+    await Supabase.instance.client.auth.signOut();
+    if (mounted) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const LoginScreen()),
+      );
+    }
+  }
+
+  void goToProfile() {
+    // If we are already on profile page, just close the drawer
+    Navigator.pop(context); 
+  }
+  void goToOrders() {
+    // If we are already on orders page, just close the drawer
+    Navigator.pop(context);
+    // go to orders page
+    Navigator.push(context, MaterialPageRoute(builder: (context) => const CurrentOrdersScreen(),)); // Navigate to orders page
+  }
+  void goToHome() {
+    // If we are already on home page, just close the drawer
+    Navigator.pop(context);
+    // go to home page
+    Navigator.push(context, MaterialPageRoute(builder: (context) => const HomeScreen(),)); // Navigate to home page
+  }
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -33,6 +64,12 @@ class _CurrentOrdersScreenState extends State<CurrentOrdersScreen> {
         title: const Text('My Current Orders'),
         backgroundColor: Colors.black,
         foregroundColor: Colors.white,
+      ),
+      drawer: MyDrawer(
+        onProfileTap: goToProfile,
+        onSignout: signOut,
+        onViewOrdersTap: goToOrders, // Navigate to orders page
+        onHomeTap: goToHome, // Navigate to home page
       ),
       body: FutureBuilder<List<Map<String, dynamic>>>(
         future: _fetchCurrentOrders(),
