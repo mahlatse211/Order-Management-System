@@ -154,7 +154,8 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Katliey Graphics', style: TextStyle(color: Colors.white)),
-        backgroundColor: Colors.red,
+        backgroundColor: Colors.black,
+        foregroundColor: Colors.white,
       ),
       drawer: MyDrawer(
         onProfileTap: goToProfile,

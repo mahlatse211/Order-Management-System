@@ -74,6 +74,7 @@ class _ProfilePageState extends State<ProfilePage> {
       appBar: AppBar(
         title: const Text('Profile Page', style: TextStyle(color: Colors.white)),
         backgroundColor: Colors.black,
+        foregroundColor: Colors.white,
       ),
       drawer: MyDrawer(
         onProfileTap: goToProfile,
