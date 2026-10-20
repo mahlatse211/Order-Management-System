@@ -93,11 +93,16 @@ class _ProfilePageState extends State<ProfilePage> {
 
           // If there's an error (e.g., row not found), show error message
           if (snapshot.hasError) {
-            return Center(
-              child: Text(
-                'Error loading profile:\n${snapshot.error}',
-                textAlign: TextAlign.center,
-                style: const TextStyle(color: Colors.red),
+            // Replace Center with Align and set alignment to bottomCenter
+            return Align(
+              alignment: Alignment.bottomCenter,
+              child: Padding(
+                padding: const EdgeInsets.all(24.0), // Add some padding so it's not flush with the edge
+                child: Text(
+                  'Error loading orders: ${snapshot.error}',
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(color: Colors.red),
+                ),
               ),
             );
           }
