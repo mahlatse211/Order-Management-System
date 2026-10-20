@@ -23,7 +23,7 @@ class _CurrentOrdersScreenState extends State<CurrentOrdersScreen> {
     final response = await Supabase.instance.client
         .from('orders')
         .select()
-        .eq('user_id', userId!) // Filter by the current user
+        .eq('order_id', userId!) // Filter by the current user
         .order('created_at', ascending: false); // Show newest orders first
 
     return List<Map<String, dynamic>>.from(response);

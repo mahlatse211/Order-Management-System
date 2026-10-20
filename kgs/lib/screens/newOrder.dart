@@ -25,7 +25,7 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
       final user = Supabase.instance.client.auth.currentUser;
 
       await Supabase.instance.client.from('orders').insert({
-           'auth_id': user?.id, // Uncommented: links order to the logged-in user
+          //  'auth_id': user?.id, // Uncommented: links order to the logged-in user
         // 'customer_id': user,
         'service_name': _selectedService, // Make sure your DB column accepts text, or change this to an ID
         'description': _titleController.text.trim(),
