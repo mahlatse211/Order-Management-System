@@ -6,6 +6,7 @@ import 'package:kgs/screens/newOrder.dart';
 import 'package:kgs/screens/profile.dart';
 import 'package:kgs/screens/service_page.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'viewOrder.dart';
 
 class CurrentOrdersScreen extends StatefulWidget {
   const CurrentOrdersScreen({super.key});
@@ -195,6 +196,14 @@ class _CurrentOrdersScreenState extends State<CurrentOrdersScreen> {
                       // Optional: Navigate to an Order Details page
                       // Navigator.push(...);
                     },
+                    // onPressed: () {
+//   Navigator.push(
+//     context,
+//     MaterialPageRoute(
+//       builder: (context) => OrderDetailScreen(orderId: order['id'].toString()), // Pass the specific order ID here
+//     ),
+//   );
+// },
                     child: const Text('View'),
                   ),
                 ),

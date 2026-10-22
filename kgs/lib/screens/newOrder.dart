@@ -96,7 +96,70 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
     return 'R$minTotal - R$maxTotal';
   }
 
-  Future<void> _submitOrder() async {
+  // Future<void> _submitOrder() async {
+  //   setState(() => _isLoading = true);
+  //   try {
+  //     final user = Supabase.instance.client.auth.currentUser;
+
+  //     if (user == null) {
+  //       throw Exception("You must be logged in to place an order.");
+  //     }
+
+  //     // 1. Fetch Customer ID
+  //     final customerRecord = await Supabase.instance.client
+  //         .from('customers')
+  //         .select('id')
+  //         .eq('auth_id', user.id)
+  //         .single();
+
+  //     final int customerId = customerRecord['id'];
+
+  //     // 2. Upload Image to Supabase Storage (if one was selected)
+  //     String? uploadedImageUrl;
+      
+  //     if (_selectedImage != null) {
+  //       final fileName = '${DateTime.now().millisecondsSinceEpoch}_${user.id}.jpg';
+        
+  //       // Upload to 'order-references' bucket
+  //       await Supabase.instance.client.storage
+  //           .from('order-references')
+  //           .upload(fileName, _selectedImage!);
+
+  //       // Get the public URL
+  //       uploadedImageUrl = Supabase.instance.client.storage
+  //           .from('order-references')
+  //           .getPublicUrl(fileName);
+  //     }
+
+  //     // 3. Insert into Database
+  //     await Supabase.instance.client.from('orders').insert({
+  //       'customer_id': customerId, 
+  //       'service_name': _selectedService, 
+  //       'description': _titleController.text.trim(),
+  //       'quantity': int.tryParse(_qtyController.text) ?? 1,
+  //       // 'budget': double.tryParse(_budgetController.text.trim()) ?? 0.0,
+  //       'status': 'Pending',
+  //       // 'notes': _notesController.text.trim(), 
+  //       // 'reference_image_url': uploadedImageUrl, 
+  //     });
+
+  //     if (!mounted) return;
+  //     ScaffoldMessenger.of(context).showSnackBar(
+  //       const SnackBar(content: Text('Order submitted successfully!'), backgroundColor: Colors.green),
+  //     );
+  //     Navigator.pop(context);
+  //   } catch (e) {
+  //     if (!mounted) return;
+  //     ScaffoldMessenger.of(context).showSnackBar(
+  //       SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
+  //     );
+  //   } finally {
+  //     if (mounted) setState(() => _isLoading = false);
+  //   }
+  // }
+
+  //Image See if it works
+Future<void> _submitOrder() async {
     setState(() => _isLoading = true);
     try {
       final user = Supabase.instance.client.auth.currentUser;
@@ -120,27 +183,25 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
       if (_selectedImage != null) {
         final fileName = '${DateTime.now().millisecondsSinceEpoch}_${user.id}.jpg';
         
-        // Upload to 'order-references' bucket
+        // Upload to your 'KGS' bucket
         await Supabase.instance.client.storage
-            .from('order-references')
+            .from('KGS')
             .upload(fileName, _selectedImage!);
 
-        // Get the public URL
+        // Get the public URL from the 'KGS' bucket
         uploadedImageUrl = Supabase.instance.client.storage
-            .from('order-references')
+            .from('KGS')
             .getPublicUrl(fileName);
       }
 
-      // 3. Insert into Database
+      // 3. Insert into Database using your 'Images' column name
       await Supabase.instance.client.from('orders').insert({
         'customer_id': customerId, 
         'service_name': _selectedService, 
         'description': _titleController.text.trim(),
         'quantity': int.tryParse(_qtyController.text) ?? 1,
-        // 'budget': double.tryParse(_budgetController.text.trim()) ?? 0.0,
         'status': 'Pending',
-        // 'notes': _notesController.text.trim(), 
-        // 'reference_image_url': uploadedImageUrl, 
+        'Images': uploadedImageUrl, // <--- Updated to match your exact column name
       });
 
       if (!mounted) return;
@@ -157,7 +218,7 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
       if (mounted) setState(() => _isLoading = false);
     }
   }
-
+//STOP
   Future<void> signOut() async {
     await Supabase.instance.client.auth.signOut();
     if (mounted) {
@@ -301,6 +362,11 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
                   keyboardType: TextInputType.number, 
                   inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                   decoration: InputDecoration(
+                    labelText: 'Quantity',
+              helperText: 'Estimated Price: $_estimatedPrice', 
+               helperStyle: const TextStyle(color: Colors.green, fontWeight: FontWeight.bold),
+            
+           
                     prefixIcon: const Icon(Icons.numbers, color: Colors.black),
                     hintText: 'Quantity',
                     filled: true,
@@ -310,6 +376,9 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
                       borderSide: BorderSide.none,
                     ),
                   ),
+                   onChanged: (value) {
+              setState(() {}); 
+            },
                 ),
                 const SizedBox(height: 15),
           
