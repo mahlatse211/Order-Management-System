@@ -40,10 +40,10 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
   final Map<String, String> _serviceImages = {
     'Logo Design': 'assets/Logo2.jpeg',
     'Brand Design': 'assets/Brand Design.jpeg',
-    'Website Design': '',
-    'Event Promotion': 'https://images.unsplash.com/photo-1558655146-d09347e92766?q=80&w=100&auto=format&fit=crop',
-    'Print Design': 'https://images.unsplash.com/photo-1611162617474-5b21e879e113?q=80&w=100&auto=format&fit=crop',
-    'Digital Design': 'https://images.unsplash.com/photo-1572044162444-ad60f128bdea?q=80&w=100&auto=format&fit=crop',
+    'Website Design': 'assets/WebD.jpeg',
+    'Event Promotion': 'assets/EventProm1.jpeg',
+    'Print Design': 'assets/Flyer.jpeg',
+    'Digital Design': 'assets/DigD2.jpeg',
   };
 
   // --- Price Ranges Logic ---
