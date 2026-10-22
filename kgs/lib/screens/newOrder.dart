@@ -137,10 +137,10 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
         'service_name': _selectedService, 
         'description': _titleController.text.trim(),
         'quantity': int.tryParse(_qtyController.text) ?? 1,
-        'budget': double.tryParse(_budgetController.text.trim()) ?? 0.0,
+        // 'budget': double.tryParse(_budgetController.text.trim()) ?? 0.0,
         'status': 'Pending',
-        'notes': _notesController.text.trim(), 
-        'reference_image_url': uploadedImageUrl, 
+        // 'notes': _notesController.text.trim(), 
+        // 'reference_image_url': uploadedImageUrl, 
       });
 
       if (!mounted) return;
