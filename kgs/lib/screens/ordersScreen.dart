@@ -16,21 +16,63 @@ class CurrentOrdersScreen extends StatefulWidget {
 
 class _CurrentOrdersScreenState extends State<CurrentOrdersScreen> {
   // Get the current user ID
-  final String? userId = Supabase.instance.client.auth.currentUser?.id;
+  // final String? userId = Supabase.instance.client.auth.currentUser?.id;
+  // final String ?user = Supabase.instance.client.auth.currentUser?.id;
 
-  // Fetch orders from Supabase where the user_id matches the logged-in user
+  // // Fetch orders from Supabase where the user_id matches the logged-in user
+  // Future<List<Map<String, dynamic>>> _fetchCurrentOrders() async
+  //  {
+  //    if (user == null) throw Exception("User not logged in");
+
+  //   // NOTE: Change 'orders' to your actual table name if it's different
+  //   final response = await Supabase.instance.client
+  //       .from('orders')
+  //       .select()
+  //       .eq('order_id', user!) // Filter by the current user
+  //       .order('created_at', ascending: false); // Show newest orders first
+
+  //   return response;
+  // }
+
   Future<List<Map<String, dynamic>>> _fetchCurrentOrders() async {
-    if (userId == null) throw Exception("User not logged in");
+  final supabase = Supabase.instance.client;
+  final currentUser = supabase.auth.currentUser;
 
-    // NOTE: Change 'orders' to your actual table name if it's different
-    final response = await Supabase.instance.client
+  if (currentUser == null) {
+    throw Exception('User not logged in');
+  }
+
+  try {
+    // Find this user's integer customer ID.
+    final customer = await supabase
+        .from('customers')
+        .select('id')
+        .eq('auth_id', currentUser.id)
+        .maybeSingle();
+
+    if (customer == null) {
+      throw Exception('Customer record not found');
+    }
+
+    final int customerId = customer['id'] as int;
+
+    debugPrint('Customer ID: $customerId');
+
+    // Fetch orders belonging to this customer.
+    final response = await supabase
         .from('orders')
         .select()
-        .eq('order_id', userId!) // Filter by the current user
-        .order('created_at', ascending: false); // Show newest orders first
+        .eq('customer_id', customerId)
+        .order('created_at', ascending: false);
+
+    debugPrint('Orders found: ${response.length}');
 
     return List<Map<String, dynamic>>.from(response);
+  } catch (e) {
+    debugPrint('Error fetching current orders: $e');
+    rethrow;
   }
+}
 
   Future<void> signOut() async {
     await Supabase.instance.client.auth.signOut();
@@ -132,7 +174,7 @@ class _CurrentOrdersScreenState extends State<CurrentOrdersScreen> {
               final order = orders[index];
               
               // Replace these keys with the actual column names from your Supabase 'orders' table
-              final orderId = order['id'] ?? 'N/A';
+              final orderId = order['service_name'] ?? 'N/A';
               final orderStatus = order['status'] ?? 'Pending';
               final orderDate = order['created_at'] != null 
                   ? order['created_at'].toString().substring(0, 10) // Simple date format
