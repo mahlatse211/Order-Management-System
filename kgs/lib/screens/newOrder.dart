@@ -38,9 +38,9 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
   // --- Service Images Map ---
   // These images will show in the dropdown. Replace with your actual URLs.
   final Map<String, String> _serviceImages = {
-    'Logo Design': 'https://images.unsplash.com/photo-1626785774573-4b799315345d?q=80&w=100&auto=format&fit=crop',
-    'Brand Design': 'https://images.unsplash.com/photo-1561070791-2526d30994b5?q=80&w=100&auto=format&fit=crop',
-    'Website Design': 'https://images.unsplash.com/photo-1547658719-da2b51169166?q=80&w=100&auto=format&fit=crop',
+    'Logo Design': 'assets/Logo2.jpeg',
+    'Brand Design': 'assets/Brand Design.jpeg',
+    'Website Design': '',
     'Event Promotion': 'https://images.unsplash.com/photo-1558655146-d09347e92766?q=80&w=100&auto=format&fit=crop',
     'Print Design': 'https://images.unsplash.com/photo-1611162617474-5b21e879e113?q=80&w=100&auto=format&fit=crop',
     'Digital Design': 'https://images.unsplash.com/photo-1572044162444-ad60f128bdea?q=80&w=100&auto=format&fit=crop',
@@ -262,44 +262,75 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
           ),
           const SizedBox(height: 15),
           
+          // TextField(
+          //   controller: _titleController, 
+          //   decoration: const InputDecoration(labelText: 'Order Title / Brief Description')
+          // ),
           TextField(
-            controller: _titleController, 
-            decoration: const InputDecoration(labelText: 'Order Title / Brief Description')
-          ),
+                  controller: _titleController,
+                  decoration: InputDecoration(
+                    prefixIcon: const Icon(Icons.info_outline, color: Colors.black),
+                    hintText: 'Order Title/ Brief Description',
+                    filled: true,
+                    fillColor: Colors.grey[200],
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide.none,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 15),
           
           // --- Quantity Field with dynamic price estimate ---
+          // TextField(
+          //   controller: _qtyController, 
+          //   keyboardType: TextInputType.number, 
+          //   inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+          //   decoration: InputDecoration(
+          //     labelText: 'Quantity',
+          //     helperText: 'Estimated Price: $_estimatedPrice', 
+          //     helperStyle: const TextStyle(color: Colors.green, fontWeight: FontWeight.bold),
+          //   ),
+          //   onChanged: (value) {
+          //     setState(() {}); 
+          //   },
+          // ),
+          //Quantity Text Field
           TextField(
-            controller: _qtyController, 
-            keyboardType: TextInputType.number, 
-            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-            decoration: InputDecoration(
-              labelText: 'Quantity',
-              helperText: 'Estimated Price: $_estimatedPrice', 
-              helperStyle: const TextStyle(color: Colors.green, fontWeight: FontWeight.bold),
-            ),
-            onChanged: (value) {
-              setState(() {}); 
-            },
-          ),
+                  controller: _qtyController,
+                  keyboardType: TextInputType.number, 
+                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                  decoration: InputDecoration(
+                    prefixIcon: const Icon(Icons.numbers, color: Colors.black),
+                    hintText: 'Quantity',
+                    filled: true,
+                    fillColor: Colors.grey[200],
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide.none,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 15),
           
-          TextField(
-            controller: _notesController, 
-            maxLines: 3, 
-            decoration: const InputDecoration(labelText: 'Additional Notes')
-          ),
+          // TextField(
+          //   controller: _notesController, 
+          //   maxLines: 3, 
+          //   decoration: const InputDecoration(labelText: 'Additional Notes')
+          // ),
           
-          TextField(
-            controller: _budgetController,
-            keyboardType: const TextInputType.numberWithOptions(decimal: true), 
-            inputFormatters: [
-              FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')), 
-            ],
-            decoration: const InputDecoration(
-              labelText: 'Enter Your Budget (R)',
-            ),
-          ),
+          // TextField(
+          //   controller: _budgetController,
+          //   keyboardType: const TextInputType.numberWithOptions(decimal: true), 
+          //   inputFormatters: [
+          //     FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')), 
+          //   ],
+          //   decoration: const InputDecoration(
+          //     labelText: 'Enter Your Budget (R)',
+          //   ),
+          // ),
 
-          const SizedBox(height: 20),
+          // const SizedBox(height: 20),
 
           // --- Image Upload UI ---
           const Text('Reference Image (Optional)', style: TextStyle(fontWeight: FontWeight.bold)),
