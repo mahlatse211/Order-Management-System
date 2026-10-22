@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:kgs/screens/drawer.dart';
 import 'package:kgs/screens/homeScreen.dart';
 import 'package:kgs/screens/login.dart';
+import 'package:kgs/screens/newOrder.dart';
 import 'package:kgs/screens/profile.dart';
+import 'package:kgs/screens/service_page.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class CurrentOrdersScreen extends StatefulWidget {
@@ -56,6 +58,18 @@ class _CurrentOrdersScreenState extends State<CurrentOrdersScreen> {
     // go to home page
     Navigator.push(context, MaterialPageRoute(builder: (context) => const HomeScreen(),)); // Navigate to home page
   }
+  void goToPlaceOrder() {
+    // If we are already on place order page, just close the drawer
+    Navigator.pop(context);
+    // go to place order page
+    Navigator.push(context, MaterialPageRoute(builder: (context) => const NewOrderScreen(),)); // Navigate to place order page
+  }
+  void goToService() {
+    // If we are already on service page, just close the drawer
+    Navigator.pop(context);
+    // go to service page
+    Navigator.push(context, MaterialPageRoute(builder: (context) => const ServicesScreen(),)); // Navigate to service page
+  }
 
 
   @override
@@ -71,6 +85,8 @@ class _CurrentOrdersScreenState extends State<CurrentOrdersScreen> {
         onSignout: signOut,
         onViewOrdersTap: goToOrders, // Navigate to orders page
         onHomeTap: goToHome, // Navigate to home page
+        onPlaceOrderTap: goToPlaceOrder, // Navigate to place order page
+        onServiceTap: goToService, // Navigate to service page
       ),
       body: FutureBuilder<List<Map<String, dynamic>>>(
         future: _fetchCurrentOrders(),

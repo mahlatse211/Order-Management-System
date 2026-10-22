@@ -6,6 +6,8 @@ class MyDrawer extends StatelessWidget {
   final void Function()? onSignout;
   final void Function()? onViewOrdersTap;
   final void Function()? onHomeTap;
+  final void Function()? onPlaceOrderTap;
+  final void Function()? onServiceTap;
 
   const MyDrawer({
     super.key, 
@@ -13,6 +15,8 @@ class MyDrawer extends StatelessWidget {
     required this.onSignout,
     required this.onViewOrdersTap,
     required this.onHomeTap,
+    required this.onPlaceOrderTap,
+    required this.onServiceTap,
  });
 
   @override
@@ -49,7 +53,7 @@ class MyDrawer extends StatelessWidget {
           MyListTile(
             icon: Icons.shopping_cart, // Changed icon to make more sense
             text: 'PLACE ORDER',
-            onTap: () => Navigator.pop(context), // Close drawer
+            onTap: onPlaceOrderTap, // Calls the function passed from PlaceOrderScreen
           ),
 
           MyListTile(
@@ -57,6 +61,8 @@ class MyDrawer extends StatelessWidget {
             text: 'VIEW ORDER',
             onTap: onViewOrdersTap, // Calls the function passed from HomeScreen
           ),
+
+          MyListTile(icon: Icons.info, text: 'SERVICE', onTap: onServiceTap,), // Calls the function passed from HomeScreen
           ],
          ),
 
