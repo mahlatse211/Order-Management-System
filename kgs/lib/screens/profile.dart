@@ -254,7 +254,7 @@ class _ProfilePageState extends State<ProfilePage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                  Padding(
-                   padding: const EdgeInsets.only(left: 400.0),
+                   padding: const EdgeInsets.only(left: 420.0),
                    child: IconButton(
                       icon: const Icon(Icons.home),
                       onPressed: goToHome,
@@ -308,13 +308,10 @@ class _ProfilePageState extends State<ProfilePage> {
               children: [
                 // 1. Logged in text at the top of General
                 Center(
-                  child: Padding(
-                    padding: const EdgeInsets.only(left: 25.0),
                     child: Text(
                       'Logged in as: ${currentUser?.email ?? "No Email"}',
                       style: const TextStyle(color: Colors.grey, fontSize: 13),
-                    ),
-                  ),
+                    ),           
                 ),
                 const SizedBox(height: 10),
                 const Text('General', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
