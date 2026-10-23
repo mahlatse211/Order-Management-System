@@ -121,7 +121,7 @@ class _CurrentOrdersScreenState extends State<CurrentOrdersScreen> {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => OrderDetailScreen(orderId: order['order_id']),
+                                builder: (context) => OrderDetailScreen(orderId: order['order_id'], serviceName:order['service_name']), // Pass the order ID and service name to the detail screen
                               ),
                             );
                           },
