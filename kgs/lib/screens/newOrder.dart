@@ -1,4 +1,4 @@
-import 'dart:io'; 
+import 'dart:typed_data'; // Required for Uint8List (Web compatible)
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
@@ -33,18 +33,20 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
   static const int _maxDeadlineDays = 30;
   bool _isLoading = false;
 
-  File? _selectedImage;
+  // 1. FIXED: Use Uint8List instead of File for Web compatibility
+  Uint8List? _selectedImageBytes; 
   final ImagePicker _picker = ImagePicker();
 
   final List<String> _services = ['Logo Design', 'Brand Design', 'Website Design', 'Event Promotion', 'Print Design', 'Digital Design'];
 
+  // 2. FIXED: Use Network URLs instead of local assets
   final Map<String, String> _serviceImages = {
-    'Logo Design': 'assets/Logo2.jpeg',
-    'Brand Design': 'assets/Brand Design.jpeg',
-    'Website Design': 'assets/WebD.jpeg',
-    'Event Promotion': 'assets/EventProm1.jpeg',
-    'Print Design': 'assets/Flyer.jpeg',
-    'Digital Design': 'assets/DigD2.jpeg',
+    'Logo Design': 'https://images.unsplash.com/photo-1626785774573-4b799315345d?q=80&w=100&auto=format&fit=crop',
+    'Brand Design': 'https://images.unsplash.com/photo-1561070791-2526d30994b5?q=80&w=100&auto=format&fit=crop',
+    'Website Design': 'https://images.unsplash.com/photo-1547658719-da2b51169166?q=80&w=100&auto=format&fit=crop',
+    'Event Promotion': 'https://images.unsplash.com/photo-1558655146-d09347e92766?q=80&w=100&auto=format&fit=crop',
+    'Print Design': 'https://images.unsplash.com/photo-1611162617474-5b21e879e113?q=80&w=100&auto=format&fit=crop',
+    'Digital Design': 'https://images.unsplash.com/photo-1572044162444-ad60f128bdea?q=80&w=100&auto=format&fit=crop',
   };
 
   final Map<String, Map<String, int>> _serviceRates = {
@@ -76,11 +78,13 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
     super.dispose();
   }
 
+  // 3. FIXED: Read the image as Bytes instead of a File
   Future<void> _pickImage() async {
     final XFile? pickedFile = await _picker.pickImage(source: ImageSource.gallery);
     if (pickedFile != null) {
+      final bytes = await pickedFile.readAsBytes();
       setState(() {
-        _selectedImage = File(pickedFile.path);
+        _selectedImageBytes = bytes;
       });
     }
   }
@@ -121,12 +125,13 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
 
       String? uploadedImageUrl;
       
-      if (_selectedImage != null) {
+      // 4. FIXED: Use uploadBinary for Web compatibility
+      if (_selectedImageBytes != null) {
         final fileName = '${DateTime.now().millisecondsSinceEpoch}_${user.id}.jpg';
         
         await Supabase.instance.client.storage
             .from('KGS')
-            .upload(fileName, _selectedImage!);
+            .uploadBinary(fileName, _selectedImageBytes!); // Upload bytes
 
         uploadedImageUrl = Supabase.instance.client.storage
             .from('KGS')
@@ -186,10 +191,12 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
   void goToPlaceOrder() {
     Navigator.pop(context); 
   }
+  
   void goToServices() {
     Navigator.pop(context); 
     Navigator.push(context, MaterialPageRoute(builder: (context) => const ServicesScreen())); 
   }
+  
   void goToGallery() {
     Navigator.pop(context);
     Navigator.push(context, MaterialPageRoute(builder: (context) => const GalleryScreen())); 
@@ -265,8 +272,8 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(6),
                         image: DecorationImage(
-                          // FIXED: Changed from NetworkImage to AssetImage
-                          image: AssetImage(_serviceImages[s]!), 
+                          // 5. FIXED: Using NetworkImage here
+                          image: NetworkImage(_serviceImages[s]!), 
                           fit: BoxFit.cover,
                         ),
                       ),
@@ -352,10 +359,11 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
                 borderRadius: BorderRadius.circular(10),
                 border: Border.all(color: Colors.grey.shade400),
               ),
-              child: _selectedImage != null
+              // 6. FIXED: Use Image.memory for the preview
+              child: _selectedImageBytes != null
                   ? ClipRRect(
                       borderRadius: BorderRadius.circular(10),
-                      child: Image.file(_selectedImage!, fit: BoxFit.cover),
+                      child: Image.memory(_selectedImageBytes!, fit: BoxFit.cover),
                     )
                   : const Column(
                       mainAxisAlignment: MainAxisAlignment.center,

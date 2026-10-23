@@ -10,6 +10,7 @@ class Order {
   final double? budget;
   final DateTime? deadline;
   final String message;
+  final DateTime? createdAt; // Added to check time limit
 
   Order({
     required this.orderId,
@@ -19,6 +20,7 @@ class Order {
     this.budget,
     this.deadline,
     required this.message,
+    this.createdAt,
   });
 
   factory Order.fromMap(Map<String, dynamic> map) {
@@ -30,6 +32,7 @@ class Order {
       budget: (map['budget'] as num?)?.toDouble(),
       deadline: map['deadline'] != null ? DateTime.parse(map['deadline']) : null,
       message: map['admin_message'] ?? '',
+      createdAt: map['created_at'] != null ? DateTime.parse(map['created_at']).toLocal() : null,
     );
   }
 }
@@ -68,7 +71,9 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Order Details : ${widget.serviceName}'),
+        title: Text('Order Details : ${widget.serviceName}', style: const TextStyle(color: Colors.white)),
+        backgroundColor: Colors.black,
+        foregroundColor: Colors.white,
       ),
       body: FutureBuilder<Order?>(
         future: _orderFuture,
@@ -82,6 +87,12 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
           }
 
           final order = snapshot.data!;
+          
+          // Check if it is still within the 24 hour window
+          bool isWithin24Hours = false;
+          if (order.createdAt != null) {
+            isWithin24Hours = DateTime.now().difference(order.createdAt!).inHours <= 24;
+          }
 
           return Padding(
             padding: const EdgeInsets.all(16.0),
@@ -108,7 +119,9 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                                 fontWeight: FontWeight.bold,
                                 color: order.status.toLowerCase() == 'completed'
                                     ? Colors.green
-                                    : Colors.orange,
+                                    : order.status.toLowerCase() == 'cancelled'
+                                        ? Colors.red
+                                        : Colors.orange,
                               ),
                             ),
                           ],
@@ -170,7 +183,6 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                           ],
                         ),
                         
-                        // --- FIX: Moved Message outside the Deadline Row ---
                         const SizedBox(height: 16),
                         const Text(
                           'Message From Admin:',
@@ -181,6 +193,31 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                           order.message.isEmpty ? 'No message from admin' : order.message,
                           style: const TextStyle(fontSize: 16),
                         ),
+
+                        // --- NEW: 24-Hour Warning Message ---
+                        if (isWithin24Hours && order.status.toLowerCase() == 'pending') ...[
+                          const Divider(height: 32),
+                          Container(
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: Colors.amber[50],
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(color: Colors.amber.shade200)
+                            ),
+                            child: Row(
+                              children: [
+                                Icon(Icons.info_outline, color: Colors.amber[800], size: 20),
+                                const SizedBox(width: 8),
+                                const Expanded(
+                                  child: Text(
+                                    'You can cancel this order within 24 hours of placing it.',
+                                    style: TextStyle(fontSize: 13, color: Colors.black87),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ]
                       ],
                     ),
                   ),

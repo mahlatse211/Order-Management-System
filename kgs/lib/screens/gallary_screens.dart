@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:kgs/screens/newOrder.dart'; // Ensure this path is correct
 
 class GalleryScreen extends StatefulWidget {
   const GalleryScreen({super.key});
@@ -14,7 +15,7 @@ class _GalleryScreenState extends State<GalleryScreen> {
     final response = await Supabase.instance.client
         .from('portfolio')
         .select()
-        .order('created_at', ascending: false); // Newest first
+        .order('created_at', ascending: false); 
         
     return List<Map<String, dynamic>>.from(response);
   }
@@ -27,35 +28,60 @@ class _GalleryScreenState extends State<GalleryScreen> {
         backgroundColor: Colors.black,
         foregroundColor: Colors.white,
       ),
+      
+      // 2. The Wide Floating Button in the Bottom Center
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+      floatingActionButton: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 24.0),
+        child: SizedBox(
+          width: double.infinity, // Makes the button stretch across the bottom
+          height: 55,
+          child: FloatingActionButton.extended(
+            onPressed: () {
+              // Navigate to the New Order Page
+              Navigator.push(
+                context, 
+                MaterialPageRoute(builder: (context) => const NewOrderScreen()),
+              );
+            },
+            backgroundColor: Colors.redAccent,
+            foregroundColor: Colors.white,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            icon: const Icon(Icons.shopping_bag),
+            label: const Text(
+              'Start a New Order', 
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
+          ),
+        ),
+      ),
+      
       body: FutureBuilder<List<Map<String, dynamic>>>(
         future: _fetchGallery(),
         builder: (context, snapshot) {
-          // Loading State
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           }
 
-          // Error State
           if (snapshot.hasError) {
             return Center(child: Text('Error loading gallery: ${snapshot.error}', style: const TextStyle(color: Colors.red)));
           }
 
-          // Empty State
           if (!snapshot.hasData || snapshot.data!.isEmpty) {
             return const Center(child: Text('No images in the gallery yet.', style: TextStyle(color: Colors.grey)));
           }
 
           final galleryItems = snapshot.data!;
 
-          // 2. Display in a Grid
           return GridView.builder(
-            padding: const EdgeInsets.all(12.0),
+            // 3. Add padding at the bottom so the grid doesn't hide behind the floating button
+            padding: const EdgeInsets.only(left: 12.0, right: 12.0, top: 12.0, bottom: 90.0), 
             itemCount: galleryItems.length,
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2, // 2 images per row
+              crossAxisCount: 2, 
               crossAxisSpacing: 12,
               mainAxisSpacing: 12,
-              childAspectRatio: 0.85, // Adjusts the height of the cards
+              childAspectRatio: 0.85, 
             ),
             itemBuilder: (context, index) {
               final item = galleryItems[index];
@@ -64,7 +90,6 @@ class _GalleryScreenState extends State<GalleryScreen> {
 
               return GestureDetector(
                 onTap: () {
-                  // 3. Open the image full screen when tapped
                   if (imageUrl != null && imageUrl.isNotEmpty) {
                     Navigator.push(
                       context,
@@ -84,7 +109,6 @@ class _GalleryScreenState extends State<GalleryScreen> {
                   child: Stack(
                     fit: StackFit.expand,
                     children: [
-                      // The Image
                       imageUrl != null && imageUrl.isNotEmpty
                           ? Image.network(
                               imageUrl, 
@@ -108,7 +132,6 @@ class _GalleryScreenState extends State<GalleryScreen> {
                               child: const Icon(Icons.image, size: 50, color: Colors.grey),
                             ),
                       
-                      // A dark gradient at the bottom so the text is readable over the image
                       Positioned(
                         bottom: 0,
                         left: 0,
@@ -142,7 +165,7 @@ class _GalleryScreenState extends State<GalleryScreen> {
   }
 }
 
-// 4. A simple full-screen image viewer with zoom
+// Full screen image viewer
 class FullScreenImage extends StatelessWidget {
   final String imageUrl;
   final String title;
@@ -159,7 +182,6 @@ class FullScreenImage extends StatelessWidget {
         iconTheme: const IconThemeData(color: Colors.white),
       ),
       body: Center(
-        // InteractiveViewer allows the user to pinch and zoom the image
         child: InteractiveViewer(
           panEnabled: true,
           boundaryMargin: const EdgeInsets.all(20),
