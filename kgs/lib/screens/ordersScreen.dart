@@ -139,29 +139,32 @@ class _CurrentOrdersScreenState extends State<CurrentOrdersScreen> {
                   ? order['created_at'].toString().substring(0, 10) 
                   : 'Unknown Date';
 
-              return Card(
-                margin: const EdgeInsets.only(bottom: 12.0),
-                elevation: 4,
-                child: ListTile(
-                  leading: const Icon(Icons.shopping_bag, color: Colors.black),
-                  title: Text(orderService, style: const TextStyle(fontWeight: FontWeight.bold)),
-                  subtitle: Text('Date: $orderDate\nStatus: $orderStatus'),
-                  trailing: TextButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => OrderDetailScreen(orderId: order['order_id']),
+                    return Card(
+                      margin: const EdgeInsets.only(bottom: 12.0),
+                      elevation: 4,
+                      child: ListTile(
+                        leading: const Icon(Icons.shopping_bag, color: Colors.black),
+                        title: Text(orderService, style: const TextStyle(fontWeight: FontWeight.bold)),
+                        subtitle: Text('Date: $orderDate\nStatus: $orderStatus'),
+                        trailing: TextButton(
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => OrderDetailScreen(orderId: order['order_id'], serviceName:order['service_name']), // Pass the order ID and service name to the detail screen
+                              ),
+                            );
+                          },
+                          child: const Text('View'),
                         ),
-                      );
-                    },
-                    child: const Text('View'),
-                  ),
-                ),
-              );
-            },
-          );
-        },
+                      ),
+                    );
+                  },
+                );
+              },
+            ),
+          ),
+        ],
       ),
     );
   }

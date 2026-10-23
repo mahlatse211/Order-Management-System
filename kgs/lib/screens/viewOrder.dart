@@ -5,6 +5,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 class Order {
   final String orderId;
   final String description;
+  final String serviceName;
   final String status;
   final double? budget;
   final DateTime? deadline;
@@ -14,6 +15,7 @@ class Order {
     required this.orderId,
     required this.description,
     required this.status,
+    required this.serviceName,
     this.budget,
     this.deadline,
     required this.message,
@@ -23,6 +25,7 @@ class Order {
     return Order(
       orderId: map['order_id'].toString(),
       description: map['description'] ?? '',
+      serviceName: map['service_name'] ?? '',
       status: map['status'] ?? 'Pending',
       budget: (map['budget'] as num?)?.toDouble(),
       deadline: map['deadline'] != null ? DateTime.parse(map['deadline']) : null,
@@ -34,8 +37,9 @@ class Order {
 // 2. Order Detail Screen Widget
 class OrderDetailScreen extends StatefulWidget {
   final String orderId;
+  final String serviceName;
 
-  const OrderDetailScreen({super.key, required this.orderId});
+  const OrderDetailScreen({Key? key, required this.orderId}) : super(key: key);
 
   @override
   State<OrderDetailScreen> createState() => _OrderDetailScreenState();
@@ -64,7 +68,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Order Details #${widget.orderId.substring(0, 6)}'),
+        title: Text('Order Details : ${widget.serviceName}'),
       ),
       body: FutureBuilder<Order?>(
         future: _orderFuture,
