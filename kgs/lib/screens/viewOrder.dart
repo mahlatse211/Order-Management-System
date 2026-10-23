@@ -29,7 +29,7 @@ class Order {
       status: map['status'] ?? 'Pending',
       budget: (map['budget'] as num?)?.toDouble(),
       deadline: map['deadline'] != null ? DateTime.parse(map['deadline']) : null,
-      message:map['admin_message']?? '',
+      message: map['admin_message'] ?? '',
     );
   }
 }
@@ -39,7 +39,7 @@ class OrderDetailScreen extends StatefulWidget {
   final String orderId;
   final String serviceName;
 
-  const OrderDetailScreen({Key? key, required this.orderId}) : super(key: key);
+  const OrderDetailScreen({Key? key, required this.orderId, required this.serviceName}) : super(key: key);
 
   @override
   State<OrderDetailScreen> createState() => _OrderDetailScreenState();
@@ -94,6 +94,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        // Status Row
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
@@ -113,12 +114,16 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                           ],
                         ),
                         const Divider(height: 24),
+
+                        // Order ID
                         Text(
                           'Order ID:',
                           style: TextStyle(color: Colors.grey[600], fontSize: 12),
                         ),
                         Text(order.orderId, style: const TextStyle(fontWeight: FontWeight.w500)),
                         const SizedBox(height: 16),
+
+                        // Description
                         const Text(
                           'Description',
                           style: TextStyle(color: Colors.grey, fontSize: 12),
@@ -129,6 +134,8 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                           style: const TextStyle(fontSize: 16),
                         ),
                         const Divider(height: 24),
+
+                        // Budget Row
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
@@ -146,6 +153,8 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                           ],
                         ),
                         const SizedBox(height: 12),
+
+                        // Deadline Row
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
@@ -158,21 +167,19 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                                   ? order.deadline.toString().split(' ')[0]
                                   : 'No deadline',
                             ),
-                        //     Text(
-                        //   'Message From Admin',
-                        //   style: TextStyle(color: Colors.grey[600], fontSize: 12),
-                        // ),
-                        // Text(order.orderId, style: const TextStyle(fontWeight: FontWeight.w500)),
+                          ],
+                        ),
+                        
+                        // --- FIX: Moved Message outside the Deadline Row ---
                         const SizedBox(height: 16),
                         const Text(
-                          'Message From Admin: ',
+                          'Message From Admin:',
                           style: TextStyle(color: Colors.grey, fontSize: 12),
                         ),
+                        const SizedBox(height: 4),
                         Text(
-                          order.message.isEmpty ? 'No description provided' : order.message,
+                          order.message.isEmpty ? 'No message from admin' : order.message,
                           style: const TextStyle(fontSize: 16),
-                        ),
-                          ],
                         ),
                       ],
                     ),

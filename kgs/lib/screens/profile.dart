@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:kgs/screens/gallary_screens.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:kgs/screens/login.dart';
 import 'package:kgs/screens/drawer.dart';
@@ -194,6 +195,10 @@ class _ProfilePageState extends State<ProfilePage> {
     Navigator.pop(context);
     Navigator.push(context, MaterialPageRoute(builder: (context) => const ServicesScreen())); 
   }
+  void goToGallery() {
+    Navigator.pop(context);
+    Navigator.push(context, MaterialPageRoute(builder: (context) => const GalleryScreen())); 
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -211,6 +216,7 @@ class _ProfilePageState extends State<ProfilePage> {
         onHomeTap: goToHome, 
         onPlaceOrderTap: goToPlaceOrder, 
         onServiceTap: goToService, 
+        onGalleryTap: goToGallery,
       ),
       backgroundColor: Colors.grey[100],
       body: _buildBody(const Color.fromARGB(255, 0, 0, 0)),

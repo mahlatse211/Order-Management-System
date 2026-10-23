@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:kgs/screens/gallary_screens.dart';
 import 'package:kgs/screens/newOrder.dart'; 
 import 'package:kgs/screens/drawer.dart';
 import 'package:kgs/screens/homeScreen.dart';
@@ -46,6 +47,10 @@ class _ServicesScreenState extends State<ServicesScreen> {
     Navigator.pop(context);
     Navigator.push(context, MaterialPageRoute(builder: (context) => const NewOrderScreen())); 
   }
+  void goToGallery() {
+    Navigator.pop(context);
+    Navigator.push(context, MaterialPageRoute(builder: (context) => const GalleryScreen())); 
+  }
   
   void goToService(BuildContext context) {
     Navigator.pop(context); // Already here
@@ -85,6 +90,7 @@ class _ServicesScreenState extends State<ServicesScreen> {
         onHomeTap: () => goToHome(context), 
         onPlaceOrderTap: () => goToPlaceOrder(context), 
         onServiceTap: () => goToService(context),
+        onGalleryTap: goToGallery,
       ),
       // 2. FutureBuilder to handle the loading of ASP.NET data
       body: FutureBuilder<List<Map<String, dynamic>>>(

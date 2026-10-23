@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:kgs/screens/gallary_screens.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:kgs/screens/drawer.dart';
 import 'package:kgs/screens/login.dart';
@@ -81,6 +82,10 @@ class _CurrentOrdersScreenState extends State<CurrentOrdersScreen> {
     Navigator.pop(context);
     Navigator.push(context, MaterialPageRoute(builder: (context) => const ServicesScreen())); 
   }
+  void goToGallery() {
+    Navigator.pop(context);
+    Navigator.push(context, MaterialPageRoute(builder: (context) => const GalleryScreen())); 
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -98,6 +103,7 @@ class _CurrentOrdersScreenState extends State<CurrentOrdersScreen> {
         onHomeTap: goToHome, 
         onPlaceOrderTap: goToPlaceOrder, 
         onServiceTap: goToService, 
+        onGalleryTap: goToGallery,
       ),
       body: FutureBuilder<List<Map<String, dynamic>>>(
         future: _fetchCurrentOrders(),
@@ -163,9 +169,7 @@ class _CurrentOrdersScreenState extends State<CurrentOrdersScreen> {
                 );
               },
             ),
-          ),
-        ],
-      ),
-    );
+          );
+   
   }
 }

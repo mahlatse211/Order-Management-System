@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:kgs/screens/drawer.dart';
+import 'package:kgs/screens/gallary_screens.dart';
 import 'package:kgs/screens/homeScreen.dart';
 import 'package:kgs/screens/login.dart';
 import 'package:kgs/screens/ordersScreen.dart';
@@ -189,6 +190,10 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
     Navigator.pop(context); 
     Navigator.push(context, MaterialPageRoute(builder: (context) => const ServicesScreen())); 
   }
+  void goToGallery() {
+    Navigator.pop(context);
+    Navigator.push(context, MaterialPageRoute(builder: (context) => const GalleryScreen())); 
+  }
 
   Future<void> _pickDeadline() async {
     final now = DateTime.now();
@@ -229,6 +234,7 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
         onHomeTap: goToHome, 
         onPlaceOrderTap: goToPlaceOrder, 
         onServiceTap: goToServices,
+        onGalleryTap: goToGallery,
       ),
       body: ListView(
         padding: const EdgeInsets.all(16),

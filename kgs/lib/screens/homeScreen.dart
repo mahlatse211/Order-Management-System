@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:kgs/screens/drawer.dart';
+import 'package:kgs/screens/gallary_screens.dart';
 import 'package:kgs/screens/login.dart';
 import 'package:kgs/screens/ordersScreen.dart';
 import 'package:kgs/screens/profile.dart';
@@ -91,6 +92,10 @@ class _HomeScreenState extends State<HomeScreen> {
     Navigator.pop(context);
     Navigator.push(context, MaterialPageRoute(builder: (context) => const ServicesScreen())); 
   }
+  void goToGallery() {
+    Navigator.pop(context);
+    Navigator.push(context, MaterialPageRoute(builder: (context) => const GalleryScreen())); 
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -108,6 +113,7 @@ class _HomeScreenState extends State<HomeScreen> {
         onHomeTap: goToHome, 
         onPlaceOrderTap: goToPlaceOrder, 
         onServiceTap: goToService, 
+        onGalleryTap: goToGallery,
       ),
       body: Container(
         color: Colors.black, // Dark background behind the white card

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:kgs/components/list_tile.dart'; // Make sure this path is correct for your project
+import 'package:kgs/components/list_tile.dart';
+import 'package:kgs/screens/gallary_screens.dart'; // Make sure this path is correct for your project
 
 class MyDrawer extends StatelessWidget {
   final void Function()? onProfileTap;
@@ -8,6 +9,7 @@ class MyDrawer extends StatelessWidget {
   final void Function()? onHomeTap;
   final void Function()? onPlaceOrderTap;
   final void Function()? onServiceTap;
+  final void Function()? onGalleryTap; // New callback for Gallery
 
   const MyDrawer({
     super.key, 
@@ -17,6 +19,7 @@ class MyDrawer extends StatelessWidget {
     required this.onHomeTap,
     required this.onPlaceOrderTap,
     required this.onServiceTap,
+    required this.onGalleryTap, // Initialize the new callback
  });
 
   @override
@@ -63,8 +66,15 @@ class MyDrawer extends StatelessWidget {
           ),
 
           MyListTile(icon: Icons.info, text: 'SERVICE', onTap: onServiceTap,), // Calls the function passed from HomeScreen
+
+          // Inside your MyDrawer build method, add this:
+          MyListTile(
+            icon: Icons.photo_library, 
+            text: 'GALLERY',
+            onTap: onGalleryTap, // Calls the function passed from HomeScreen
+          ),
           ],
-         ),
+        ),
 
           // 3. THE SPACER
           // This expands to fill all remaining space, pushing the logout button down
