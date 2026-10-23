@@ -1,3 +1,6 @@
+
+
+//Third Option
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -11,6 +14,7 @@ class Order {
   final DateTime? deadline;
   final String message;
   final DateTime? createdAt; // Added to check time limit
+  final String? images; // Added for the bucket image path
 
   Order({
     required this.orderId,
@@ -21,6 +25,7 @@ class Order {
     this.deadline,
     required this.message,
     this.createdAt,
+    this.images,
   });
 
   factory Order.fromMap(Map<String, dynamic> map) {
@@ -33,6 +38,7 @@ class Order {
       deadline: map['deadline'] != null ? DateTime.parse(map['deadline']) : null,
       message: map['admin_message'] ?? '',
       createdAt: map['created_at'] != null ? DateTime.parse(map['created_at']).toLocal() : null,
+      images: map['images'] ?? map['Images'], // Fixed: handles both lowercase and capital 'Images'
     );
   }
 }
@@ -148,6 +154,69 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                         ),
                         const Divider(height: 24),
 
+                        // --- NEW: Uploaded Image Section ---
+                        const Text(
+                          'Uploaded Image',
+                          style: TextStyle(color: Colors.grey, fontSize: 12),
+                        ),
+                        const SizedBox(height: 8),
+                        order.images != null && order.images!.trim().isNotEmpty
+                            ? Builder(
+                                builder: (context) {
+                                  final cleanPath = order.images!.trim().replaceFirst(RegExp(r'^/+'), '');
+                                  final String imageUrl = cleanPath.startsWith('http')
+                                      ? cleanPath
+                                      : Supabase.instance.client.storage.from('KGS').getPublicUrl(cleanPath);
+
+                                  return ClipRRect(
+                                    borderRadius: BorderRadius.circular(8),
+                                    child: Image.network(
+                                      imageUrl,
+                                      height: 200,
+                                      width: double.infinity,
+                                      fit: BoxFit.cover,
+                                      loadingBuilder: (context, child, loadingProgress) {
+                                        if (loadingProgress == null) return child;
+                                        return Container(
+                                          height: 200,
+                                          alignment: Alignment.center,
+                                          child: CircularProgressIndicator(
+                                            value: loadingProgress.expectedTotalBytes != null
+                                                ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes!
+                                                : null,
+                                          ),
+                                        );
+                                      },
+                                      errorBuilder: (context, error, stackTrace) => Container(
+                                        height: 200,
+                                        alignment: Alignment.center,
+                                        color: Colors.grey[200],
+                                        child: Text(
+                                          'Failed to load image\n(${error.toString()})',
+                                          textAlign: TextAlign.center,
+                                          style: const TextStyle(color: Colors.red, fontSize: 11),
+                                        ),
+                                      ),
+                                    ),
+                                  );
+                                },
+                              )
+                            : Container(
+                                height: 80,
+                                width: double.infinity,
+                                alignment: Alignment.center,
+                                decoration: BoxDecoration(
+                                  color: Colors.grey[100],
+                                  borderRadius: BorderRadius.circular(8),
+                                  border: Border.all(color: Colors.grey.shade300),
+                                ),
+                                child: const Text(
+                                  'No image inserted',
+                                  style: TextStyle(color: Colors.grey, fontStyle: FontStyle.italic),
+                                ),
+                              ),
+                        const Divider(height: 24),
+
                         // Budget Row
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -194,7 +263,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                           style: const TextStyle(fontSize: 16),
                         ),
 
-                        // --- NEW: 24-Hour Warning Message ---
+                        // --- 24-Hour Warning Message ---
                         if (isWithin24Hours && order.status.toLowerCase() == 'pending') ...[
                           const Divider(height: 32),
                           Container(
