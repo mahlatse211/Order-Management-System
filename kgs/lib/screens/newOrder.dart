@@ -26,8 +26,13 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
   final _qtyController = TextEditingController(text: '1');
   final _notesController = TextEditingController();
   final _budgetController = TextEditingController();
+  final _deadlineController = TextEditingController();
+  DateTime? _selectedDeadline;  
   
+  // Maximum number of days from today
+  static const int _maxDeadlineDays = 30;
   bool _isLoading = false;
+
 
   // --- Image Picker Variables ---
   File? _selectedImage;
@@ -72,6 +77,7 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
     _qtyController.dispose();
     _notesController.dispose();
     _budgetController.dispose();
+    _deadlineController.dispose();
     super.dispose();
   }
 
@@ -160,6 +166,14 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
 
   //Image See if it works
 Future<void> _submitOrder() async {
+  if (_selectedDeadline == null) {
+  ScaffoldMessenger.of(context).showSnackBar(
+    const SnackBar(
+      content: Text('Please select an order deadline.'),
+    ),
+  );
+  return;
+}
     setState(() => _isLoading = true);
     try {
       final user = Supabase.instance.client.auth.currentUser;
@@ -201,6 +215,7 @@ Future<void> _submitOrder() async {
         'description': _titleController.text.trim(),
         'quantity': int.tryParse(_qtyController.text) ?? 1,
         'status': 'Pending',
+        'deadline':_deadlineController.text,
         'Images': uploadedImageUrl, // <--- Updated to match your exact column name
       });
 
@@ -381,25 +396,26 @@ Future<void> _submitOrder() async {
             },
                 ),
                 const SizedBox(height: 15),
-          
-          // TextField(
-          //   controller: _notesController, 
-          //   maxLines: 3, 
-          //   decoration: const InputDecoration(labelText: 'Additional Notes')
-          // ),
-          
-          // TextField(
-          //   controller: _budgetController,
-          //   keyboardType: const TextInputType.numberWithOptions(decimal: true), 
-          //   inputFormatters: [
-          //     FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')), 
-          //   ],
-          //   decoration: const InputDecoration(
-          //     labelText: 'Enter Your Budget (R)',
-          //   ),
-          // ),
 
-          // const SizedBox(height: 20),
+              
+          
+          TextField(
+      controller: _deadlineController,
+  readOnly: true,
+  onTap: _pickDeadline,
+  decoration: InputDecoration(
+    labelText: 'Order Deadline',
+    hintText: 'Select a deadline date',
+    prefixIcon: const Icon(Icons.calendar_month),
+    filled: true,
+    fillColor: Colors.grey[200],
+    border: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(12),
+      borderSide: BorderSide.none,
+    ),
+  ),
+),
+const SizedBox(height: 15),
 
           // --- Image Upload UI ---
           const Text('Reference Image (Optional)', style: TextStyle(fontWeight: FontWeight.bold)),
@@ -445,4 +461,38 @@ Future<void> _submitOrder() async {
       ),
     );
   }
+
+
+//Pick Deadline DATE
+Future<void> _pickDeadline() async {
+  final now = DateTime.now();
+
+  // Remove the time component so today is selectable.
+  final today = DateTime(now.year, now.month, now.day);
+
+  // Users cannot choose a date more than 30 days ahead.
+  final lastAllowedDate = today.add(
+    const Duration(days: _maxDeadlineDays),
+  );
+
+  final DateTime? pickedDate = await showDatePicker(
+    context: context,
+    initialDate: _selectedDeadline ?? today,
+    firstDate: today,
+    lastDate: lastAllowedDate,
+    helpText: 'Select order deadline',
+  );
+
+  if (pickedDate == null || !mounted) return;
+
+  setState(() {
+    _selectedDeadline = pickedDate;
+
+    // Format for Supabase DATE: YYYY-MM-DD
+    _deadlineController.text =
+        '${pickedDate.year}-'
+        '${pickedDate.month.toString().padLeft(2, '0')}-'
+        '${pickedDate.day.toString().padLeft(2, '0')}';
+  });
+}
 }

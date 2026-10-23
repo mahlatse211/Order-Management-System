@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:kgs/screens/homeScreen.dart';
-import 'package:kgs/screens/newOrder.dart';
 import 'package:kgs/screens/ordersScreen.dart';
-import 'package:kgs/screens/service_page.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:kgs/screens/login.dart';
 
