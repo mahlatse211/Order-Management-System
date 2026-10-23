@@ -1,7 +1,7 @@
-import 'dart:io'; // Required for File
+import 'dart:typed_data'; // Required for Uint8List
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:image_picker/image_picker.dart'; // Required for picking images
+import 'package:image_picker/image_picker.dart';
 import 'package:kgs/screens/drawer.dart';
 import 'package:kgs/screens/homeScreen.dart';
 import 'package:kgs/screens/login.dart';
@@ -29,19 +29,15 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
   final _deadlineController = TextEditingController();
   DateTime? _selectedDeadline;  
   
-  // Maximum number of days from today
   static const int _maxDeadlineDays = 30;
   bool _isLoading = false;
 
-
-  // --- Image Picker Variables ---
-  File? _selectedImage;
+  // --- FIX: Use Uint8List instead of File for Web compatibility ---
+  Uint8List? _selectedImageBytes; 
   final ImagePicker _picker = ImagePicker();
 
   final List<String> _services = ['Logo Design', 'Brand Design', 'Website Design', 'Event Promotion', 'Print Design', 'Digital Design'];
 
-  // --- Service Images Map ---
-  // These images will show in the dropdown. Replace with your actual URLs.
   final Map<String, String> _serviceImages = {
     'Logo Design': 'assets/Logo2.jpeg',
     'Brand Design': 'assets/Brand Design.jpeg',
@@ -51,7 +47,6 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
     'Digital Design': 'assets/DigD2.jpeg',
   };
 
-  // --- Price Ranges Logic ---
   final Map<String, Map<String, int>> _serviceRates = {
     'Logo Design': {'min': 150, 'max': 300},
     'Brand Design': {'min': 500, 'max': 1000},
@@ -81,17 +76,17 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
     super.dispose();
   }
 
-  // --- Function to pick image ---
+  // --- FIX: Read image as Bytes ---
   Future<void> _pickImage() async {
     final XFile? pickedFile = await _picker.pickImage(source: ImageSource.gallery);
     if (pickedFile != null) {
+      final bytes = await pickedFile.readAsBytes();
       setState(() {
-        _selectedImage = File(pickedFile.path);
+        _selectedImageBytes = bytes;
       });
     }
   }
 
-  // --- Calculate Price Range based on Quantity ---
   String get _estimatedPrice {
     final qty = int.tryParse(_qtyController.text) ?? 1;
     final rates = _serviceRates[_selectedService] ?? {'min': 0, 'max': 0};
@@ -102,78 +97,14 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
     return 'R$minTotal - R$maxTotal';
   }
 
-  // Future<void> _submitOrder() async {
-  //   setState(() => _isLoading = true);
-  //   try {
-  //     final user = Supabase.instance.client.auth.currentUser;
-
-  //     if (user == null) {
-  //       throw Exception("You must be logged in to place an order.");
-  //     }
-
-  //     // 1. Fetch Customer ID
-  //     final customerRecord = await Supabase.instance.client
-  //         .from('customers')
-  //         .select('id')
-  //         .eq('auth_id', user.id)
-  //         .single();
-
-  //     final int customerId = customerRecord['id'];
-
-  //     // 2. Upload Image to Supabase Storage (if one was selected)
-  //     String? uploadedImageUrl;
-      
-  //     if (_selectedImage != null) {
-  //       final fileName = '${DateTime.now().millisecondsSinceEpoch}_${user.id}.jpg';
-        
-  //       // Upload to 'order-references' bucket
-  //       await Supabase.instance.client.storage
-  //           .from('order-references')
-  //           .upload(fileName, _selectedImage!);
-
-  //       // Get the public URL
-  //       uploadedImageUrl = Supabase.instance.client.storage
-  //           .from('order-references')
-  //           .getPublicUrl(fileName);
-  //     }
-
-  //     // 3. Insert into Database
-  //     await Supabase.instance.client.from('orders').insert({
-  //       'customer_id': customerId, 
-  //       'service_name': _selectedService, 
-  //       'description': _titleController.text.trim(),
-  //       'quantity': int.tryParse(_qtyController.text) ?? 1,
-  //       // 'budget': double.tryParse(_budgetController.text.trim()) ?? 0.0,
-  //       'status': 'Pending',
-  //       // 'notes': _notesController.text.trim(), 
-  //       // 'reference_image_url': uploadedImageUrl, 
-  //     });
-
-  //     if (!mounted) return;
-  //     ScaffoldMessenger.of(context).showSnackBar(
-  //       const SnackBar(content: Text('Order submitted successfully!'), backgroundColor: Colors.green),
-  //     );
-  //     Navigator.pop(context);
-  //   } catch (e) {
-  //     if (!mounted) return;
-  //     ScaffoldMessenger.of(context).showSnackBar(
-  //       SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
-  //     );
-  //   } finally {
-  //     if (mounted) setState(() => _isLoading = false);
-  //   }
-  // }
-
-  //Image See if it works
-Future<void> _submitOrder() async {
-  if (_selectedDeadline == null) {
-  ScaffoldMessenger.of(context).showSnackBar(
-    const SnackBar(
-      content: Text('Please select an order deadline.'),
-    ),
-  );
-  return;
-}
+  Future<void> _submitOrder() async {
+    if (_selectedDeadline == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please select an order deadline.')),
+      );
+      return;
+    }
+    
     setState(() => _isLoading = true);
     try {
       final user = Supabase.instance.client.auth.currentUser;
@@ -182,7 +113,6 @@ Future<void> _submitOrder() async {
         throw Exception("You must be logged in to place an order.");
       }
 
-      // 1. Fetch Customer ID
       final customerRecord = await Supabase.instance.client
           .from('customers')
           .select('id')
@@ -191,32 +121,29 @@ Future<void> _submitOrder() async {
 
       final int customerId = customerRecord['id'];
 
-      // 2. Upload Image to Supabase Storage (if one was selected)
       String? uploadedImageUrl;
       
-      if (_selectedImage != null) {
+      // --- FIX: Upload using uploadBinary ---
+      if (_selectedImageBytes != null) {
         final fileName = '${DateTime.now().millisecondsSinceEpoch}_${user.id}.jpg';
         
-        // Upload to your 'KGS' bucket
         await Supabase.instance.client.storage
             .from('KGS')
-            .upload(fileName, _selectedImage!);
+            .uploadBinary(fileName, _selectedImageBytes!); // Use uploadBinary
 
-        // Get the public URL from the 'KGS' bucket
         uploadedImageUrl = Supabase.instance.client.storage
             .from('KGS')
             .getPublicUrl(fileName);
       }
 
-      // 3. Insert into Database using your 'Images' column name
       await Supabase.instance.client.from('orders').insert({
         'customer_id': customerId, 
         'service_name': _selectedService, 
         'description': _titleController.text.trim(),
         'quantity': int.tryParse(_qtyController.text) ?? 1,
         'status': 'Pending',
-        'deadline':_deadlineController.text,
-        'Images': uploadedImageUrl, // <--- Updated to match your exact column name
+        'deadline': _deadlineController.text,
+        'Images': uploadedImageUrl, 
       });
 
       if (!mounted) return;
@@ -233,7 +160,7 @@ Future<void> _submitOrder() async {
       if (mounted) setState(() => _isLoading = false);
     }
   }
-//STOP
+
   Future<void> signOut() async {
     await Supabase.instance.client.auth.signOut();
     if (mounted) {
@@ -267,6 +194,30 @@ Future<void> _submitOrder() async {
     Navigator.push(context, MaterialPageRoute(builder: (context) => const ServicesScreen())); 
   }
 
+  Future<void> _pickDeadline() async {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final lastAllowedDate = today.add(const Duration(days: _maxDeadlineDays));
+
+    final DateTime? pickedDate = await showDatePicker(
+      context: context,
+      initialDate: _selectedDeadline ?? today,
+      firstDate: today,
+      lastDate: lastAllowedDate,
+      helpText: 'Select order deadline',
+    );
+
+    if (pickedDate == null || !mounted) return;
+
+    setState(() {
+      _selectedDeadline = pickedDate;
+      _deadlineController.text =
+          '${pickedDate.year}-'
+          '${pickedDate.month.toString().padLeft(2, '0')}-'
+          '${pickedDate.day.toString().padLeft(2, '0')}';
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -289,7 +240,6 @@ Future<void> _submitOrder() async {
           const Text('Select a service', style: TextStyle(fontWeight: FontWeight.bold)),
           const SizedBox(height: 5),
           
-          // --- UPDATED DROPDOWN ---
           DropdownButtonFormField<String>(
             value: _selectedService,
             isExpanded: true,
@@ -303,15 +253,9 @@ Future<void> _submitOrder() async {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    // Text on the left
                     Expanded(
-                      child: Text(
-                        s,
-                        style: const TextStyle(fontSize: 15),
-                        overflow: TextOverflow.ellipsis,
-                      ),
+                      child: Text(s, style: const TextStyle(fontSize: 15), overflow: TextOverflow.ellipsis),
                     ),
-                    // Picture on the far right
                     Container(
                       width: 36,
                       height: 36,
@@ -319,7 +263,7 @@ Future<void> _submitOrder() async {
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(6),
                         image: DecorationImage(
-                          image: NetworkImage(_serviceImages[s]!),
+                          image: AssetImage(_serviceImages[s]!), 
                           fit: BoxFit.cover,
                         ),
                       ),
@@ -338,86 +282,61 @@ Future<void> _submitOrder() async {
           ),
           const SizedBox(height: 15),
           
-          // TextField(
-          //   controller: _titleController, 
-          //   decoration: const InputDecoration(labelText: 'Order Title / Brief Description')
-          // ),
           TextField(
-                  controller: _titleController,
-                  decoration: InputDecoration(
-                    prefixIcon: const Icon(Icons.info_outline, color: Colors.black),
-                    hintText: 'Order Title/ Brief Description',
-                    filled: true,
-                    fillColor: Colors.grey[200],
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide.none,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 15),
+            controller: _titleController,
+            decoration: InputDecoration(
+              prefixIcon: const Icon(Icons.info_outline, color: Colors.black),
+              hintText: 'Order Title/ Brief Description',
+              filled: true,
+              fillColor: Colors.grey[200],
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide.none,
+              ),
+            ),
+          ),
+          const SizedBox(height: 15),
           
-          // --- Quantity Field with dynamic price estimate ---
-          // TextField(
-          //   controller: _qtyController, 
-          //   keyboardType: TextInputType.number, 
-          //   inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-          //   decoration: InputDecoration(
-          //     labelText: 'Quantity',
-          //     helperText: 'Estimated Price: $_estimatedPrice', 
-          //     helperStyle: const TextStyle(color: Colors.green, fontWeight: FontWeight.bold),
-          //   ),
-          //   onChanged: (value) {
-          //     setState(() {}); 
-          //   },
-          // ),
-          //Quantity Text Field
           TextField(
-                  controller: _qtyController,
-                  keyboardType: TextInputType.number, 
-                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                  decoration: InputDecoration(
-                    labelText: 'Quantity',
+            controller: _qtyController,
+            keyboardType: TextInputType.number, 
+            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+            decoration: InputDecoration(
+              labelText: 'Quantity',
               helperText: 'Estimated Price: $_estimatedPrice', 
-               helperStyle: const TextStyle(color: Colors.green, fontWeight: FontWeight.bold),
-            
-           
-                    prefixIcon: const Icon(Icons.numbers, color: Colors.black),
-                    hintText: 'Quantity',
-                    filled: true,
-                    fillColor: Colors.grey[200],
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide.none,
-                    ),
-                  ),
-                   onChanged: (value) {
+              helperStyle: const TextStyle(color: Colors.green, fontWeight: FontWeight.bold),
+              prefixIcon: const Icon(Icons.numbers, color: Colors.black),
+              filled: true,
+              fillColor: Colors.grey[200],
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide.none,
+              ),
+            ),
+            onChanged: (value) {
               setState(() {}); 
             },
-                ),
-                const SizedBox(height: 15),
+          ),
+          const SizedBox(height: 15),
 
-              
-          
           TextField(
-      controller: _deadlineController,
-  readOnly: true,
-  onTap: _pickDeadline,
-  decoration: InputDecoration(
-    labelText: 'Order Deadline',
-    hintText: 'Select a deadline date',
-    prefixIcon: const Icon(Icons.calendar_month),
-    filled: true,
-    fillColor: Colors.grey[200],
-    border: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(12),
-      borderSide: BorderSide.none,
-    ),
-  ),
-),
-const SizedBox(height: 15),
+            controller: _deadlineController,
+            readOnly: true,
+            onTap: _pickDeadline,
+            decoration: InputDecoration(
+              labelText: 'Order Deadline',
+              hintText: 'Select a deadline date',
+              prefixIcon: const Icon(Icons.calendar_month),
+              filled: true,
+              fillColor: Colors.grey[200],
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide.none,
+              ),
+            ),
+          ),
+          const SizedBox(height: 15),
 
-          // --- Image Upload UI ---
           const Text('Reference Image (Optional)', style: TextStyle(fontWeight: FontWeight.bold)),
           const SizedBox(height: 8),
           GestureDetector(
@@ -430,10 +349,14 @@ const SizedBox(height: 15),
                 borderRadius: BorderRadius.circular(10),
                 border: Border.all(color: Colors.grey.shade400),
               ),
-              child: _selectedImage != null
+              // --- FIX: Use Image.memory instead of Image.file ---
+              child: _selectedImageBytes != null
                   ? ClipRRect(
                       borderRadius: BorderRadius.circular(10),
-                      child: Image.file(_selectedImage!, fit: BoxFit.cover),
+                      child: Image.memory(
+                        _selectedImageBytes!, 
+                        fit: BoxFit.cover,
+                      ),
                     )
                   : const Column(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -461,38 +384,4 @@ const SizedBox(height: 15),
       ),
     );
   }
-
-
-//Pick Deadline DATE
-Future<void> _pickDeadline() async {
-  final now = DateTime.now();
-
-  // Remove the time component so today is selectable.
-  final today = DateTime(now.year, now.month, now.day);
-
-  // Users cannot choose a date more than 30 days ahead.
-  final lastAllowedDate = today.add(
-    const Duration(days: _maxDeadlineDays),
-  );
-
-  final DateTime? pickedDate = await showDatePicker(
-    context: context,
-    initialDate: _selectedDeadline ?? today,
-    firstDate: today,
-    lastDate: lastAllowedDate,
-    helpText: 'Select order deadline',
-  );
-
-  if (pickedDate == null || !mounted) return;
-
-  setState(() {
-    _selectedDeadline = pickedDate;
-
-    // Format for Supabase DATE: YYYY-MM-DD
-    _deadlineController.text =
-        '${pickedDate.year}-'
-        '${pickedDate.month.toString().padLeft(2, '0')}-'
-        '${pickedDate.day.toString().padLeft(2, '0')}';
-  });
-}
 }

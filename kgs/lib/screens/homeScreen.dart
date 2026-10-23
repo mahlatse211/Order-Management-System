@@ -16,11 +16,15 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int _currentIndex = 0;
+  
+  // 1. Key to control the drawer without an AppBar
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
-  final List<Widget> _screens = [
-    const HomeFeedView(), // Index 0 (Now fetches from Supabase)
-    const CurrentOrdersScreen(), // Index 1
-    const ProfilePage(), // Index 2
+  // 2. Pass the key to the screens so they can open the drawer
+  late final List<Widget> _screens = [
+    HomeFeedView(scaffoldKey: _scaffoldKey), 
+    CurrentOrdersScreen(scaffoldKey: _scaffoldKey), 
+    ProfilePage(scaffoldKey: _scaffoldKey), 
   ];
 
   Future<void> signOut() async {
@@ -35,17 +39,17 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void goToProfile() {
     Navigator.pop(context); 
-    Navigator.push(context, MaterialPageRoute(builder: (context) => const ProfilePage())); 
+    setState(() => _currentIndex = 2); 
   }
 
   void goToOrders() {
     Navigator.pop(context);
-    Navigator.push(context, MaterialPageRoute(builder: (context) => const CurrentOrdersScreen())); 
+    setState(() => _currentIndex = 1); 
   }
 
   void goToHome() {
     Navigator.pop(context);
-    Navigator.push(context, MaterialPageRoute(builder: (context) => const HomeScreen())); 
+    setState(() => _currentIndex = 0); 
   }
 
   void goToPlaceOrder() {
@@ -61,11 +65,8 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Katliey Graphics', style: TextStyle(color: Colors.white)),
-        backgroundColor: Colors.black,
-        foregroundColor: Colors.white,
-      ),
+      key: _scaffoldKey, // Attach key
+      // AppBar removed!
       drawer: MyDrawer(
         onProfileTap: goToProfile,
         onSignout: signOut,
@@ -98,10 +99,10 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 }
 
-// --- UPDATED HOME FEED VIEW ---
-// Changed to StatefulWidget to fetch from Supabase
+// --- HOME FEED VIEW ---
 class HomeFeedView extends StatefulWidget {
-  const HomeFeedView({super.key});
+  final GlobalKey<ScaffoldState> scaffoldKey;
+  const HomeFeedView({super.key, required this.scaffoldKey});
 
   @override
   State<HomeFeedView> createState() => _HomeFeedViewState();
@@ -109,13 +110,12 @@ class HomeFeedView extends StatefulWidget {
 
 class _HomeFeedViewState extends State<HomeFeedView> {
   
-  // 1. Fetch the top 4 items from your 'portfolio' table
   Future<List<Map<String, dynamic>>> _fetchHomeServices() async {
     final response = await Supabase.instance.client
         .from('portfolio')
         .select()
-        .order('created_at', ascending: false) // Newest first
-        .limit(4); // Only show 4 on the home screen
+        .order('created_at', ascending: false) 
+        .limit(4); 
         
     return List<Map<String, dynamic>>.from(response);
   }
@@ -125,7 +125,26 @@ class _HomeFeedViewState extends State<HomeFeedView> {
     return SafeArea(
       child: Column(
         children: [
-          const SizedBox(height: 10),
+          // --- CUSTOM APP BAR (Replaces the removed Scaffold AppBar) ---
+          Container(
+            color: Colors.black,
+            padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0),
+            child: Row(
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.menu, color: Colors.white),
+                  onPressed: () => widget.scaffoldKey.currentState?.openDrawer(),
+                ),
+                const SizedBox(width: 8),
+                const Text(
+                  'Katliey Graphics',
+                  style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w500),
+                ),
+              ],
+            ),
+          ),
+          
+          // --- BODY ---
           Expanded(
             child: Container(
               decoration: const BoxDecoration(
@@ -144,23 +163,15 @@ class _HomeFeedViewState extends State<HomeFeedView> {
                   padding: const EdgeInsets.all(16.0),
                   child: Column(
                     children: [
-                      // 2. FutureBuilder to load the grid
                       FutureBuilder<List<Map<String, dynamic>>>(
                         future: _fetchHomeServices(),
                         builder: (context, snapshot) {
                           if (snapshot.connectionState == ConnectionState.waiting) {
-                            return const Center(
-                              child: Padding(
-                                padding: EdgeInsets.all(20.0),
-                                child: CircularProgressIndicator(),
-                              ),
-                            );
+                            return const Center(child: Padding(padding: EdgeInsets.all(20.0), child: CircularProgressIndicator()));
                           }
 
                           if (snapshot.hasError) {
-                            return Center(
-                              child: Text('Error loading services', style: TextStyle(color: Colors.red[400])),
-                            );
+                            return Center(child: Text('Error loading services', style: TextStyle(color: Colors.red[400])));
                           }
 
                           if (!snapshot.hasData || snapshot.data!.isEmpty) {
@@ -182,7 +193,6 @@ class _HomeFeedViewState extends State<HomeFeedView> {
                             itemBuilder: (context, index) {
                               final service = services[index];
                               
-                              // Extract data from your portfolio table
                               final title = service['title'] ?? 'Service';
                               final price = service['price'] ?? 'R0';
                               final category = service['category'] ?? 'General';
@@ -190,7 +200,6 @@ class _HomeFeedViewState extends State<HomeFeedView> {
 
                               return InkWell(
                                 onTap: () {
-                                  // Make the item clickable
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
@@ -208,11 +217,8 @@ class _HomeFeedViewState extends State<HomeFeedView> {
                                           color: Colors.grey[200],
                                           borderRadius: BorderRadius.circular(16),
                                           image: imageUrl != null && imageUrl.isNotEmpty
-                                              ? DecorationImage(
-                                                  image: NetworkImage(imageUrl),
-                                                  fit: BoxFit.cover,
-                                                )
-                                              : null, // Fallback if image is empty
+                                              ? DecorationImage(image: NetworkImage(imageUrl), fit: BoxFit.cover)
+                                              : null, 
                                         ),
                                         child: imageUrl == null || imageUrl.isEmpty
                                             ? const Icon(Icons.image, color: Colors.grey, size: 50)
@@ -220,24 +226,8 @@ class _HomeFeedViewState extends State<HomeFeedView> {
                                       ),
                                     ),
                                     const SizedBox(height: 8),
-                                    Text(
-                                      title,
-                                      style: const TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 14,
-                                        color: Colors.black,
-                                      ),
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                    Text(
-                                      'From $price', // Using your database price text
-                                      style: const TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 14,
-                                        color: Colors.green,
-                                      ),
-                                    ),
+                                    Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Colors.black), maxLines: 1, overflow: TextOverflow.ellipsis),
+                                    Text('From $price', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Colors.green)),
                                   ],
                                 ),
                               );
@@ -247,30 +237,17 @@ class _HomeFeedViewState extends State<HomeFeedView> {
                       ),
                       const SizedBox(height: 16),
 
-                      // 3. See More Services
+                      // See More Services
                       InkWell(
                         onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const ServicesScreen(),
-                            ),
-                          );
+                          Navigator.push(context, MaterialPageRoute(builder: (context) => const ServicesScreen()));
                         },
                         child: Row(
                           children: [
                             Expanded(child: Divider(color: Colors.grey[600], thickness: 1)),
                             Padding(
                               padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                              child: Text(
-                                'see more services',
-                                style: TextStyle(
-                                  color: Colors.blue[800],
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 13,
-                                  decoration: TextDecoration.underline,
-                                ),
-                              ),
+                              child: Text('see more services', style: TextStyle(color: Colors.blue[800], fontWeight: FontWeight.w600, fontSize: 13, decoration: TextDecoration.underline)),
                             ),
                             Expanded(child: Divider(color: Colors.grey[600], thickness: 1)),
                           ],
@@ -281,32 +258,16 @@ class _HomeFeedViewState extends State<HomeFeedView> {
                       // Promo Banner
                       Container(
                         padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFFF5252),
-                          borderRadius: BorderRadius.circular(16),
-                        ),
+                        decoration: BoxDecoration(color: const Color(0xFFFF5252), borderRadius: BorderRadius.circular(16)),
                         child: Row(
                           children: [
                             Expanded(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: const [
-                                  Text(
-                                    'Need something amazing?',
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 15,
-                                    ),
-                                  ),
+                                  Text('Need something amazing?', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 15)),
                                   SizedBox(height: 4),
-                                  Text(
-                                    "Let's bring your ideas to life",
-                                    style: TextStyle(
-                                      color: Colors.white70,
-                                      fontSize: 12,
-                                    ),
-                                  ),
+                                  Text("Let's bring your ideas to life", style: TextStyle(color: Colors.white70, fontSize: 12)),
                                 ],
                               ),
                             ),
@@ -314,29 +275,13 @@ class _HomeFeedViewState extends State<HomeFeedView> {
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: Colors.black,
                                 foregroundColor: Colors.white,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(20),
-                                ),
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 16,
-                                  vertical: 10,
-                                ),
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                               ),
                               onPressed: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => const NewOrderScreen(),
-                                  ),
-                                );
+                                Navigator.push(context, MaterialPageRoute(builder: (context) => const NewOrderScreen()));
                               },
-                              child: const Text(
-                                'New Order',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
+                              child: const Text('New Order', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
                             ),
                           ],
                         ),

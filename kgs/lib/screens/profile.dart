@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:kgs/screens/homeScreen.dart';
-import 'package:kgs/screens/ordersScreen.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:kgs/screens/login.dart';
-
+import 'package:kgs/screens/ordersScreen.dart';
 
 class ProfilePage extends StatefulWidget {
-  const ProfilePage({super.key});
+  final GlobalKey<ScaffoldState>? scaffoldKey; // 1. Added parameter
+
+  const ProfilePage({super.key, this.scaffoldKey});
 
   @override
   State<ProfilePage> createState() => _ProfilePageState();
@@ -15,20 +15,15 @@ class ProfilePage extends StatefulWidget {
 class _ProfilePageState extends State<ProfilePage> {
   final User? currentUser = Supabase.instance.client.auth.currentUser;
 
-  // --- State variables ---
   bool _isSaving = false;
   bool _isLoading = true;
   String? _errorMessage;
-  
   int _orderCount = 0;
   Map<String, dynamic> _profileData = {};
 
-  // --- Controllers ---
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
-  
-  // Password Controllers
   final TextEditingController _currentPasswordController = TextEditingController();
   final TextEditingController _newPasswordController = TextEditingController();
 
@@ -48,13 +43,9 @@ class _ProfilePageState extends State<ProfilePage> {
     super.dispose();
   }
 
-  // 1. Fetch profile data
   Future<void> _fetchProfileData() async {
     if (currentUser == null) {
-      setState(() {
-        _errorMessage = "No user logged in";
-        _isLoading = false;
-      });
+      setState(() { _errorMessage = "No user logged in"; _isLoading = false; });
       return;
     }
     
@@ -80,14 +71,10 @@ class _ProfilePageState extends State<ProfilePage> {
         _isLoading = false;
       });
     } catch (e) {
-      setState(() {
-        _errorMessage = e.toString();
-        _isLoading = false;
-      });
+      setState(() { _errorMessage = e.toString(); _isLoading = false; });
     }
   }
 
-  // 2. Save Account Details (Name & Phone)
   Future<void> _saveAccountDetails() async {
     if (currentUser == null) return;
     setState(() => _isSaving = true);
@@ -115,7 +102,6 @@ class _ProfilePageState extends State<ProfilePage> {
     }
   }
 
-  // 3. Change Password Logic
   Future<void> _changePassword() async {
     if (_currentPasswordController.text.isEmpty || _newPasswordController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -126,13 +112,10 @@ class _ProfilePageState extends State<ProfilePage> {
 
     setState(() => _isSaving = true);
     try {
-      // Step 1: Verify current password by attempting to sign in
       await Supabase.instance.client.auth.signInWithPassword(
         email: currentUser!.email!,
         password: _currentPasswordController.text,
       );
-
-      // Step 2: If successful, update to new password
       await Supabase.instance.client.auth.updateUser(
         UserAttributes(password: _newPasswordController.text),
       );
@@ -141,12 +124,9 @@ class _ProfilePageState extends State<ProfilePage> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Password changed successfully!'), backgroundColor: Colors.green),
       );
-      
-      // Clear fields and close dialog
       _currentPasswordController.clear();
       _newPasswordController.clear();
       Navigator.pop(context); 
-
     } on AuthException catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -162,7 +142,6 @@ class _ProfilePageState extends State<ProfilePage> {
     }
   }
 
-  // Show Password Dialog
   void _showPasswordDialog() {
     showDialog(
       context: context,
@@ -172,29 +151,16 @@ class _ProfilePageState extends State<ProfilePage> {
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              TextField(
-                controller: _currentPasswordController,
-                obscureText: true,
-                decoration: const InputDecoration(labelText: 'Current Password'),
-              ),
+              TextField(controller: _currentPasswordController, obscureText: true, decoration: const InputDecoration(labelText: 'Current Password')),
               const SizedBox(height: 10),
-              TextField(
-                controller: _newPasswordController,
-                obscureText: true,
-                decoration: const InputDecoration(labelText: 'New Password'),
-              ),
+              TextField(controller: _newPasswordController, obscureText: true, decoration: const InputDecoration(labelText: 'New Password')),
             ],
           ),
           actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel'),
-            ),
+            TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
             ElevatedButton(
               onPressed: _isSaving ? null : _changePassword,
-              child: _isSaving 
-                  ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
-                  : const Text('Update Password'),
+              child: _isSaving ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2)) : const Text('Update Password'),
             ),
           ],
         );
@@ -205,37 +171,21 @@ class _ProfilePageState extends State<ProfilePage> {
   Future<void> signOut() async {
     await Supabase.instance.client.auth.signOut();
     if (mounted) {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const LoginScreen()),
-      );
+      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const LoginScreen()));
     }
-  }
-
-  void goToOrders() {
-    Navigator.push(context, MaterialPageRoute(builder: (context) => const CurrentOrdersScreen())).then((_) {
-      _fetchProfileData();
-    }); 
-  }
-  void goToHome() {
-    Navigator.push(context, MaterialPageRoute(builder: (context) => const HomeScreen())); 
   }
 
   @override
   Widget build(BuildContext context) {
-    Color headerColor = const Color.fromARGB(255, 0, 0, 0); 
-
-    return Scaffold(
-      backgroundColor: Colors.grey[100],
-      body: _buildBody(headerColor),
+    // 2. Removed Scaffold, wrapped in SafeArea
+    return SafeArea(
+      child: _buildBody(const Color.fromARGB(255, 0, 0, 0)),
     );
   }
 
   Widget _buildBody(Color headerColor) {
     if (_isLoading) return const Center(child: CircularProgressIndicator());
-    if (_errorMessage != null) {
-      return Center(child: Text('Error: $_errorMessage', style: const TextStyle(color: Colors.red)));
-    }
+    if (_errorMessage != null) return Center(child: Text('Error: $_errorMessage', style: const TextStyle(color: Colors.red)));
 
     return SingleChildScrollView(
       child: Column(
@@ -247,28 +197,40 @@ class _ProfilePageState extends State<ProfilePage> {
               color: headerColor,
               borderRadius: const BorderRadius.only(bottomLeft: Radius.circular(20), bottomRight: Radius.circular(20)),
             ),
-            padding: const EdgeInsets.only(left: 20, right: 20, bottom: 20, top: 10),
+            padding: const EdgeInsets.only(left: 8, right: 20, bottom: 20, top: 8),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                 Padding(
-                   padding: const EdgeInsets.only(left: 420.0),
-                   child: IconButton(
-                      icon: const Icon(Icons.home),
-                      onPressed: goToHome,
-                      tooltip: 'Home Page',
-                      color: Colors.white,
+                // 3. Fixed the header row (Menu button + Title)
+                Row(
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.menu, color: Colors.white),
+                      onPressed: () => widget.scaffoldKey?.currentState?.openDrawer(),
                     ),
-                 ),
-                const Text('Your account', style: TextStyle(color: Colors.white70, fontSize: 14)),
-                const SizedBox(height: 5),
-                Text(
-                  _nameController.text.isNotEmpty ? _nameController.text : 'User Name',
-                  style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold),
+                    const SizedBox(width: 8),
+                    const Text('Profile Page', style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w500)),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                
+                Padding(
+                  padding: const EdgeInsets.only(left: 12.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text('Your account', style: TextStyle(color: Colors.white70, fontSize: 14)),
+                      const SizedBox(height: 5),
+                      Text(_nameController.text.isNotEmpty ? _nameController.text : 'User Name', style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold)),
+                    ],
+                  ),
                 ),
                 const SizedBox(height: 20),
                 GestureDetector(
-                  onTap: goToOrders,
+                  onTap: () {
+                    // Optional: If you want tapping the white card to go to Orders tab,
+                    // you would need to pass a callback from HomeScreen.
+                  }, 
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                     decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(10)),
@@ -284,7 +246,7 @@ class _ProfilePageState extends State<ProfilePage> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const Text('Your Orders', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                              const Text('Your Orders', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.black)),
                               Text('$_orderCount active orders', style: TextStyle(color: Colors.grey[600], fontSize: 13)),
                             ],
                           ),
@@ -304,39 +266,21 @@ class _ProfilePageState extends State<ProfilePage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // 1. Logged in text at the top of General
-                Center(
-                    child: Text(
-                      'Logged in as: ${currentUser?.email ?? "No Email"}',
-                      style: const TextStyle(color: Colors.grey, fontSize: 13),
-                    ),           
-                ),
+                Center(child: Text('Logged in as: ${currentUser?.email ?? "No Email"}', style: const TextStyle(color: Colors.grey, fontSize: 13))),
                 const SizedBox(height: 10),
-                const Text('General', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                const Text('General', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.black)),
                 const Divider(),
 
-                // 2. Account Details Expansion Tile
                 ExpansionTile(
                   leading: Icon(Icons.person_outline, color: Colors.blue[800]),
                   title: const Text('Account details'),
                   childrenPadding: const EdgeInsets.all(16),
                   children: [
-                    TextField(
-                      controller: _nameController,
-                      decoration: const InputDecoration(labelText: 'Full Name', border: OutlineInputBorder()),
-                    ),
+                    TextField(controller: _nameController, decoration: const InputDecoration(labelText: 'Full Name', border: OutlineInputBorder())),
                     const SizedBox(height: 20),
-                    TextField(
-                      controller: _emailController,
-                      readOnly: true, // Email usually can't be edited here without breaking Auth
-                      decoration: const InputDecoration(labelText: 'Email (Read-only)', border: OutlineInputBorder(), filled: true, fillColor: Colors.black12),
-                    ),
+                    TextField(controller: _emailController, readOnly: true, decoration: const InputDecoration(labelText: 'Email (Read-only)', border: OutlineInputBorder(), filled: true, fillColor: Colors.black12)),
                     const SizedBox(height: 20),
-                    TextField(
-                      controller: _phoneController,
-                      keyboardType: TextInputType.phone,
-                      decoration: const InputDecoration(labelText: 'Phone Number', border: OutlineInputBorder()),
-                    ),
+                    TextField(controller: _phoneController, keyboardType: TextInputType.phone, decoration: const InputDecoration(labelText: 'Phone Number', border: OutlineInputBorder())),
                     const SizedBox(height: 20),
                     ElevatedButton(
                       style: ElevatedButton.styleFrom(backgroundColor: Colors.blue[800], minimumSize: const Size(double.infinity, 45)),
@@ -346,26 +290,16 @@ class _ProfilePageState extends State<ProfilePage> {
                   ],
                 ),
 
-                // 3. Contact Details Expansion Tile (Read Only)
                 ExpansionTile(
                   leading: Icon(Icons.phone_outlined, color: Colors.blue[800]),
                   title: const Text('Contact details'),
                   children: [
-                    ListTile(
-                      title: const Text('Email'),
-                      subtitle: Text(currentUser?.email ?? 'N/A'),
-                      leading: const Icon(Icons.email),
-                    ),
+                    ListTile(title: const Text('Email'), subtitle: Text(currentUser?.email ?? 'N/A'), leading: const Icon(Icons.email)),
                     const SizedBox(height: 15),
-                    ListTile(
-                      title: const Text('Phone Number'),
-                      subtitle: Text(_phoneController.text.isNotEmpty ? _phoneController.text : 'Not provided'),
-                      leading: const Icon(Icons.phone),
-                    ),
+                    ListTile(title: const Text('Phone Number'), subtitle: Text(_phoneController.text.isNotEmpty ? _phoneController.text : 'Not provided'), leading: const Icon(Icons.phone)),
                   ],
                 ),
 
-                // 4. Change Password
                 ListTile(
                   leading: Icon(Icons.lock_outline, color: Colors.blue[800]),
                   title: const Text('Change Password'),
@@ -374,30 +308,17 @@ class _ProfilePageState extends State<ProfilePage> {
                 ),
                 
                 const Divider(),
-
                 const SizedBox(height: 80),
                 Center(
-                  child: Column(
-                    children: [
-                      Text('You own your data. \nWe do not share your account details or \napp activity with unauthorized third parties.',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(color: Colors.grey[600], fontSize: 12),
-                      ),
-                    ],
-                  ),
+                  child: Text('You own your data. \nWe do not share your account details or \napp activity with unauthorized third parties.', textAlign: TextAlign.center, style: TextStyle(color: Colors.grey[600], fontSize: 12)),
                 ),
                 const Divider(),
                 const SizedBox(height: 20),
 
-                // 5. Sign Out Button at the bottom
                 SizedBox(
                   width: double.infinity,
                   child: OutlinedButton.icon(
-                    style: OutlinedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      side: const BorderSide(color: Colors.red),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))
-                    ),
+                    style: OutlinedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 14), side: const BorderSide(color: Colors.red), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
                     onPressed: signOut,
                     icon: const Icon(Icons.logout, color: Colors.red),
                     label: const Text('Sign Out', style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold, fontSize: 16)),
