@@ -1,4 +1,4 @@
-import 'dart:typed_data'; // Required for Uint8List
+import 'dart:io'; 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
@@ -32,8 +32,7 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
   static const int _maxDeadlineDays = 30;
   bool _isLoading = false;
 
-  // --- FIX: Use Uint8List instead of File for Web compatibility ---
-  Uint8List? _selectedImageBytes; 
+  File? _selectedImage;
   final ImagePicker _picker = ImagePicker();
 
   final List<String> _services = ['Logo Design', 'Brand Design', 'Website Design', 'Event Promotion', 'Print Design', 'Digital Design'];
@@ -76,13 +75,11 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
     super.dispose();
   }
 
-  // --- FIX: Read image as Bytes ---
   Future<void> _pickImage() async {
     final XFile? pickedFile = await _picker.pickImage(source: ImageSource.gallery);
     if (pickedFile != null) {
-      final bytes = await pickedFile.readAsBytes();
       setState(() {
-        _selectedImageBytes = bytes;
+        _selectedImage = File(pickedFile.path);
       });
     }
   }
@@ -123,13 +120,12 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
 
       String? uploadedImageUrl;
       
-      // --- FIX: Upload using uploadBinary ---
-      if (_selectedImageBytes != null) {
+      if (_selectedImage != null) {
         final fileName = '${DateTime.now().millisecondsSinceEpoch}_${user.id}.jpg';
         
         await Supabase.instance.client.storage
             .from('KGS')
-            .uploadBinary(fileName, _selectedImageBytes!); // Use uploadBinary
+            .upload(fileName, _selectedImage!);
 
         uploadedImageUrl = Supabase.instance.client.storage
             .from('KGS')
@@ -263,6 +259,7 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(6),
                         image: DecorationImage(
+                          // FIXED: Changed from NetworkImage to AssetImage
                           image: AssetImage(_serviceImages[s]!), 
                           fit: BoxFit.cover,
                         ),
@@ -349,14 +346,10 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
                 borderRadius: BorderRadius.circular(10),
                 border: Border.all(color: Colors.grey.shade400),
               ),
-              // --- FIX: Use Image.memory instead of Image.file ---
-              child: _selectedImageBytes != null
+              child: _selectedImage != null
                   ? ClipRRect(
                       borderRadius: BorderRadius.circular(10),
-                      child: Image.memory(
-                        _selectedImageBytes!, 
-                        fit: BoxFit.cover,
-                      ),
+                      child: Image.file(_selectedImage!, fit: BoxFit.cover),
                     )
                   : const Column(
                       mainAxisAlignment: MainAxisAlignment.center,

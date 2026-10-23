@@ -1,26 +1,28 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:kgs/screens/login.dart';
+import 'package:kgs/screens/drawer.dart';
+import 'package:kgs/screens/homeScreen.dart';
 import 'package:kgs/screens/ordersScreen.dart';
+import 'package:kgs/screens/service_page.dart';
+import 'newOrder.dart';
 
 class ProfilePage extends StatefulWidget {
-  final GlobalKey<ScaffoldState>? scaffoldKey; // 1. Added parameter
-
-  const ProfilePage({super.key, this.scaffoldKey});
+  const ProfilePage({super.key});
 
   @override
   State<ProfilePage> createState() => _ProfilePageState();
 }
 
 class _ProfilePageState extends State<ProfilePage> {
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   final User? currentUser = Supabase.instance.client.auth.currentUser;
 
   bool _isSaving = false;
   bool _isLoading = true;
   String? _errorMessage;
   int _orderCount = 0;
-  Map<String, dynamic> _profileData = {};
-
+  
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
@@ -63,7 +65,6 @@ class _ProfilePageState extends State<ProfilePage> {
           .eq('customer_id', customerId);
 
       setState(() {
-        _profileData = response;
         _nameController.text = response['full_name']?.toString() ?? '';
         _emailController.text = currentUser?.email ?? response['email']?.toString() ?? '';
         _phoneController.text = response['phone']?.toString() ?? '';
@@ -127,15 +128,10 @@ class _ProfilePageState extends State<ProfilePage> {
       _currentPasswordController.clear();
       _newPasswordController.clear();
       Navigator.pop(context); 
-    } on AuthException catch (e) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: ${e.message}'), backgroundColor: Colors.red),
-      );
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Unexpected error: $e'), backgroundColor: Colors.red),
+        SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
       );
     } finally {
       if (mounted) setState(() => _isSaving = false);
@@ -175,11 +171,49 @@ class _ProfilePageState extends State<ProfilePage> {
     }
   }
 
+  void goToProfile() {
+    Navigator.pop(context); 
+  }
+  
+  void goToOrders() {
+    Navigator.pop(context);
+    Navigator.push(context, MaterialPageRoute(builder: (context) => const CurrentOrdersScreen())); 
+  }
+
+  void goToHome() {
+    Navigator.pop(context);
+    Navigator.push(context, MaterialPageRoute(builder: (context) => const HomeScreen())); 
+  }
+
+  void goToPlaceOrder() {
+    Navigator.pop(context);
+    Navigator.push(context, MaterialPageRoute(builder: (context) => const NewOrderScreen())); 
+  }
+
+  void goToService() {
+    Navigator.pop(context);
+    Navigator.push(context, MaterialPageRoute(builder: (context) => const ServicesScreen())); 
+  }
+
   @override
   Widget build(BuildContext context) {
-    // 2. Removed Scaffold, wrapped in SafeArea
-    return SafeArea(
-      child: _buildBody(const Color.fromARGB(255, 0, 0, 0)),
+    return Scaffold(
+      key: _scaffoldKey,
+      appBar: AppBar(
+        title: const Text('Profile Page', style: TextStyle(color: Colors.white)),
+        backgroundColor: Colors.black,
+        foregroundColor: Colors.white,
+      ),
+      drawer: MyDrawer(
+        onProfileTap: goToProfile,
+        onSignout: signOut,
+        onViewOrdersTap: goToOrders, 
+        onHomeTap: goToHome, 
+        onPlaceOrderTap: goToPlaceOrder, 
+        onServiceTap: goToService, 
+      ),
+      backgroundColor: Colors.grey[100],
+      body: _buildBody(const Color.fromARGB(255, 0, 0, 0)),
     );
   }
 
@@ -197,40 +231,16 @@ class _ProfilePageState extends State<ProfilePage> {
               color: headerColor,
               borderRadius: const BorderRadius.only(bottomLeft: Radius.circular(20), bottomRight: Radius.circular(20)),
             ),
-            padding: const EdgeInsets.only(left: 8, right: 20, bottom: 20, top: 8),
+            padding: const EdgeInsets.only(left: 20, right: 20, bottom: 20, top: 20),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // 3. Fixed the header row (Menu button + Title)
-                Row(
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.menu, color: Colors.white),
-                      onPressed: () => widget.scaffoldKey?.currentState?.openDrawer(),
-                    ),
-                    const SizedBox(width: 8),
-                    const Text('Profile Page', style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w500)),
-                  ],
-                ),
-                const SizedBox(height: 10),
-                
-                Padding(
-                  padding: const EdgeInsets.only(left: 12.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text('Your account', style: TextStyle(color: Colors.white70, fontSize: 14)),
-                      const SizedBox(height: 5),
-                      Text(_nameController.text.isNotEmpty ? _nameController.text : 'User Name', style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold)),
-                    ],
-                  ),
-                ),
+                const Text('Your account', style: TextStyle(color: Colors.white70, fontSize: 14)),
+                const SizedBox(height: 5),
+                Text(_nameController.text.isNotEmpty ? _nameController.text : 'User Name', style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold)),
                 const SizedBox(height: 20),
                 GestureDetector(
-                  onTap: () {
-                    // Optional: If you want tapping the white card to go to Orders tab,
-                    // you would need to pass a callback from HomeScreen.
-                  }, 
+                  onTap: goToOrders, 
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                     decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(10)),
