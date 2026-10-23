@@ -195,14 +195,16 @@ class _CurrentOrdersScreenState extends State<CurrentOrdersScreen> {
                     onPressed: () {
                       // Optional: Navigate to an Order Details page
                       // Navigator.push(...);
+                      Navigator.push(
+                       context,
+                         MaterialPageRoute(
+                             builder: (context) => OrderDetailScreen(orderId: order['order_id']), // Pass the specific order ID here
+    ),
+  );
                     },
                     // onPressed: () {
-//   Navigator.push(
-//     context,
-//     MaterialPageRoute(
-//       builder: (context) => OrderDetailScreen(orderId: order['id'].toString()), // Pass the specific order ID here
-//     ),
-//   );
+//   
+//    
 // },
                     child: const Text('View'),
                   ),
