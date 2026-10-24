@@ -1,6 +1,4 @@
-
-
-//Third Option
+// Option
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -48,7 +46,7 @@ class OrderDetailScreen extends StatefulWidget {
   final String orderId;
   final String serviceName;
 
-  const OrderDetailScreen({Key? key, required this.orderId, required this.serviceName}) : super(key: key);
+  const OrderDetailScreen({super.key, required this.orderId, required this.serviceName});
 
   @override
   State<OrderDetailScreen> createState() => _OrderDetailScreenState();

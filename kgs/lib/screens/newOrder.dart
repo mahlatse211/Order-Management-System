@@ -1,4 +1,4 @@
-import 'dart:typed_data'; // Required for Uint8List (Web compatible)
+// Required for Uint8List (Web compatible)
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
@@ -250,7 +250,7 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
           const SizedBox(height: 5),
           
           DropdownButtonFormField<String>(
-            value: _selectedService,
+            initialValue: _selectedService,
             isExpanded: true,
             decoration: const InputDecoration(
               border: OutlineInputBorder(),

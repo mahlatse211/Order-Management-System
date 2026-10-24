@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:kgs/components/list_tile.dart';
-import 'package:kgs/screens/gallary_screens.dart'; // Make sure this path is correct for your project
+// Make sure this path is correct for your project
 
 class MyDrawer extends StatelessWidget {
   final void Function()? onProfileTap;
