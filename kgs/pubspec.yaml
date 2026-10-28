@@ -139,6 +139,10 @@ dependencies:
   supabase_flutter: ^2.15.4
   provider: ^6.1.5+1
   image_picker: ^1.2.1
+  pdf: ^3.13.1
+  intl: ^0.20.3
+  printing: ^5.15.1
+  
 
 dev_dependencies:
   flutter_test:

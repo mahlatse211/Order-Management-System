@@ -8,6 +8,7 @@ import 'package:kgs/screens/profile.dart';
 import 'package:kgs/screens/service_page.dart';
 import 'newOrder.dart';
 import 'viewOrder.dart'; 
+import 'package:intl/intl.dart'; // Add 'intl' to pubspec.yaml for better date formatting
 
 class CurrentOrdersScreen extends StatefulWidget {
   const CurrentOrdersScreen({super.key});
@@ -51,12 +52,10 @@ class _CurrentOrdersScreenState extends State<CurrentOrdersScreen> {
 
   // --- Cancel Order Logic ---
   Future<void> _cancelOrder(String orderId, DateTime orderDate) async {
-    // 1. Check the 24-hour rule
     final now = DateTime.now();
     final difference = now.difference(orderDate);
     
     if (difference.inHours > 24) {
-      // Time has passed - Show blocking message
       if (!mounted) return;
       showDialog(
         context: context,
@@ -71,7 +70,6 @@ class _CurrentOrdersScreenState extends State<CurrentOrdersScreen> {
       return;
     }
 
-    // 2. Show confirmation dialog
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -90,7 +88,6 @@ class _CurrentOrdersScreenState extends State<CurrentOrdersScreen> {
 
     if (confirm != true) return;
 
-    // 3. Update the database
     try {
       await Supabase.instance.client
           .from('orders')
@@ -127,9 +124,7 @@ class _CurrentOrdersScreenState extends State<CurrentOrdersScreen> {
     Navigator.push(context, MaterialPageRoute(builder: (context) => const ProfilePage())); 
   }
 
-  void goToOrders() {
-    Navigator.pop(context); 
-  }
+  void goToOrders() => Navigator.pop(context); 
 
   void goToHome() {
     Navigator.pop(context);
@@ -151,14 +146,29 @@ class _CurrentOrdersScreenState extends State<CurrentOrdersScreen> {
     Navigator.push(context, MaterialPageRoute(builder: (context) => const GalleryScreen())); 
   }
 
+  // --- Helper to get Status Color ---
+  Color _getStatusColor(String status) {
+    switch (status.toLowerCase()) {
+      case 'completed':
+        return Colors.green;
+      case 'cancelled':
+        return Colors.red;
+      case 'pending':
+      default:
+        return Colors.orange;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.grey[50], // Very light grey background
       key: _scaffoldKey,
       appBar: AppBar(
-        title: const Text('My Current Orders', style: TextStyle(color: Colors.white)),
+        title: const Text('My Orders', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
         backgroundColor: Colors.black,
         foregroundColor: Colors.white,
+        elevation: 0,
       ),
       drawer: MyDrawer(
         onProfileTap: goToProfile,
@@ -190,8 +200,24 @@ class _CurrentOrdersScreenState extends State<CurrentOrdersScreen> {
           }
 
           if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return const Center(
-              child: Text('You have no current orders.', style: TextStyle(fontSize: 18, color: Colors.grey)),
+            // --- COOLER EMPTY STATE ---
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.receipt_long, size: 80, color: Colors.grey[300]),
+                  const SizedBox(height: 16),
+                  const Text(
+                    'No orders yet',
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black54),
+                  ),
+                  const SizedBox(height: 8),
+                  const Text(
+                    'When you place an order, it will appear here.',
+                    style: TextStyle(color: Colors.grey),
+                  ),
+                ],
+              ),
             );
           }
 
@@ -208,46 +234,112 @@ class _CurrentOrdersScreenState extends State<CurrentOrdersScreen> {
               final orderStatus = order['status'] ?? 'Pending';
               final orderDateString = order['created_at'];
               
-              // Parse the date for the time check
               final DateTime orderDate = DateTime.parse(orderDateString).toLocal();
-              final String formattedDate = orderDate.toString().substring(0, 10);
-
-              // 2. Calculate if the order is within the 24-hour window
+              final String formattedDate = DateFormat('MMM dd, yyyy').format(orderDate);
+              
               final difference = DateTime.now().difference(orderDate);
               final bool canCancel = difference.inHours <= 24;
 
-              return Card(
-                margin: const EdgeInsets.only(bottom: 12.0),
-                elevation: 4,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 8.0),
-                  child: ListTile(
-                    leading: const Icon(Icons.shopping_bag, color: Colors.black),
-                    title: Text(orderService, style: const TextStyle(fontWeight: FontWeight.bold)),
-                    subtitle: Text('Date: $formattedDate\nStatus: $orderStatus'),
-                    
-                    trailing: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        // 3. ONLY show cancel button if Status is Pending AND within 24 hours
-                        if (orderStatus == 'Pending' && canCancel)
-                          TextButton(
-                            onPressed: () => _cancelOrder(orderId, orderDate),
-                            child: const Text('Cancel', style: TextStyle(color: Colors.red)),
-                          ),
-                        
-                        TextButton(
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => OrderDetailScreen(orderId: orderId, serviceName: orderService),
-                              ),
-                            );
-                          },
-                          child: const Text('View'),
+              final statusColor = _getStatusColor(orderStatus);
+
+              return Container(
+                margin: const EdgeInsets.only(bottom: 16.0),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.04),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
+                    )
+                  ],
+                ),
+                child: Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(20),
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => OrderDetailScreen(orderId: orderId, serviceName: orderService),
                         ),
-                      ],
+                      );
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Row 1: Title and Status Pill
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  orderService,
+                                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: Colors.black87),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                decoration: BoxDecoration(
+                                  color: statusColor.withOpacity(0.1),
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                                child: Text(
+                                  orderStatus.toUpperCase(),
+                                  style: TextStyle(color: statusColor, fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 0.5),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 12),
+                          
+                          // Row 2: Date & Actions
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              // Date with icon
+                              Row(
+                                children: [
+                                  Icon(Icons.calendar_today, size: 14, color: Colors.grey[500]),
+                                  const SizedBox(width: 6),
+                                  Text(formattedDate, style: TextStyle(color: Colors.grey[600], fontSize: 13)),
+                                ],
+                              ),
+                              
+                              // Action Buttons
+                              Row(
+                                children: [
+                                  if (orderStatus == 'Pending' && canCancel)
+                                    TextButton(
+                                      style: TextButton.styleFrom(
+                                        padding: const EdgeInsets.symmetric(horizontal: 8),
+                                        minimumSize: Size.zero,
+                                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                      ),
+                                      onPressed: () => _cancelOrder(orderId, orderDate),
+                                      child: const Text('Cancel', style: TextStyle(color: Colors.red, fontSize: 13)),
+                                    ),
+                                  const SizedBox(width: 8),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                    decoration: BoxDecoration(
+                                      color: Colors.black,
+                                      borderRadius: BorderRadius.circular(20),
+                                    ),
+                                    child: const Text('View', style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold)),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),

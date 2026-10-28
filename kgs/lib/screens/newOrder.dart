@@ -1,4 +1,4 @@
-// Required for Uint8List (Web compatible)
+import 'dart:typed_data'; 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
@@ -13,8 +13,15 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 class NewOrderScreen extends StatefulWidget {
   final String? preselectedService; 
+  final String? preselectedImageUrl; 
+  final String? preselectedTitle; 
 
-  const NewOrderScreen({super.key, this.preselectedService});
+  const NewOrderScreen({
+    super.key, 
+    this.preselectedService, 
+    this.preselectedImageUrl,
+    this.preselectedTitle,
+  });
 
   @override
   State<NewOrderScreen> createState() => _NewOrderScreenState();
@@ -33,13 +40,11 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
   static const int _maxDeadlineDays = 30;
   bool _isLoading = false;
 
-  // 1. FIXED: Use Uint8List instead of File for Web compatibility
   Uint8List? _selectedImageBytes; 
   final ImagePicker _picker = ImagePicker();
 
   final List<String> _services = ['Logo Design', 'Brand Design', 'Website Design', 'Event Promotion', 'Print Design', 'Digital Design'];
 
-  // 2. FIXED: Use Network URLs instead of local assets
   final Map<String, String> _serviceImages = {
     'Logo Design': 'https://images.unsplash.com/photo-1626785774573-4b799315345d?q=80&w=100&auto=format&fit=crop',
     'Brand Design': 'https://images.unsplash.com/photo-1561070791-2526d30994b5?q=80&w=100&auto=format&fit=crop',
@@ -61,8 +66,7 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
   @override
   void initState() {
     super.initState();
-    _selectedService = widget.preselectedService ?? 'Logo Design';
-    
+    _selectedService = widget.preselectedTitle ?? widget.preselectedService ?? 'Logo Design';
     if (!_services.contains(_selectedService)) {
       _selectedService = 'Logo Design';
     }
@@ -78,7 +82,6 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
     super.dispose();
   }
 
-  // 3. FIXED: Read the image as Bytes instead of a File
   Future<void> _pickImage() async {
     final XFile? pickedFile = await _picker.pickImage(source: ImageSource.gallery);
     if (pickedFile != null) {
@@ -92,10 +95,8 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
   String get _estimatedPrice {
     final qty = int.tryParse(_qtyController.text) ?? 1;
     final rates = _serviceRates[_selectedService] ?? {'min': 0, 'max': 0};
-    
     final minTotal = rates['min']! * qty;
     final maxTotal = rates['max']! * qty;
-    
     return 'R$minTotal - R$maxTotal';
   }
 
@@ -110,10 +111,7 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
     setState(() => _isLoading = true);
     try {
       final user = Supabase.instance.client.auth.currentUser;
-
-      if (user == null) {
-        throw Exception("You must be logged in to place an order.");
-      }
+      if (user == null) throw Exception("You must be logged in to place an order.");
 
       final customerRecord = await Supabase.instance.client
           .from('customers')
@@ -122,17 +120,13 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
           .single();
 
       final int customerId = customerRecord['id'];
-
       String? uploadedImageUrl;
       
-      // 4. FIXED: Use uploadBinary for Web compatibility
       if (_selectedImageBytes != null) {
         final fileName = '${DateTime.now().millisecondsSinceEpoch}_${user.id}.jpg';
-        
         await Supabase.instance.client.storage
             .from('KGS')
-            .uploadBinary(fileName, _selectedImageBytes!); // Upload bytes
-
+            .uploadBinary(fileName, _selectedImageBytes!); 
         uploadedImageUrl = Supabase.instance.client.storage
             .from('KGS')
             .getPublicUrl(fileName);
@@ -140,7 +134,7 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
 
       await Supabase.instance.client.from('orders').insert({
         'customer_id': customerId, 
-        'service_name': _selectedService, 
+        'service_name': widget.preselectedTitle ?? _selectedService, 
         'description': _titleController.text.trim(),
         'quantity': int.tryParse(_qtyController.text) ?? 1,
         'status': 'Pending',
@@ -163,44 +157,17 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
     }
   }
 
+  // Navigation
   Future<void> signOut() async {
     await Supabase.instance.client.auth.signOut();
-    if (mounted) {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const LoginScreen()),
-      );
-    }
+    if (mounted) Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const LoginScreen()));
   }
-
-  void goToProfile() {
-    Navigator.pop(context);
-    Navigator.push(context, MaterialPageRoute(builder: (context) => const ProfilePage())); 
-  }
-  
-  void goToOrders() {
-    Navigator.pop(context);
-    Navigator.push(context, MaterialPageRoute(builder: (context) => const CurrentOrdersScreen())); 
-  }
-  
-  void goToHome() {
-    Navigator.pop(context);
-    Navigator.push(context, MaterialPageRoute(builder: (context) => const HomeScreen())); 
-  }
-  
-  void goToPlaceOrder() {
-    Navigator.pop(context); 
-  }
-  
-  void goToServices() {
-    Navigator.pop(context); 
-    Navigator.push(context, MaterialPageRoute(builder: (context) => const ServicesScreen())); 
-  }
-  
-  void goToGallery() {
-    Navigator.pop(context);
-    Navigator.push(context, MaterialPageRoute(builder: (context) => const GalleryScreen())); 
-  }
+  void goToProfile() { Navigator.pop(context); Navigator.push(context, MaterialPageRoute(builder: (context) => const ProfilePage())); }
+  void goToOrders() { Navigator.pop(context); Navigator.push(context, MaterialPageRoute(builder: (context) => const CurrentOrdersScreen())); }
+  void goToHome() { Navigator.pop(context); Navigator.push(context, MaterialPageRoute(builder: (context) => const HomeScreen())); }
+  void goToPlaceOrder() => Navigator.pop(context); 
+  void goToServices() { Navigator.pop(context); Navigator.push(context, MaterialPageRoute(builder: (context) => const ServicesScreen())); }
+  void goToGallery() { Navigator.pop(context); Navigator.push(context, MaterialPageRoute(builder: (context) => const GalleryScreen())); }
 
   Future<void> _pickDeadline() async {
     final now = DateTime.now();
@@ -213,179 +180,254 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
       firstDate: today,
       lastDate: lastAllowedDate,
       helpText: 'Select order deadline',
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: const ColorScheme.light(primary: Colors.black),
+          ),
+          child: child!,
+        );
+      }
     );
 
     if (pickedDate == null || !mounted) return;
-
     setState(() {
       _selectedDeadline = pickedDate;
-      _deadlineController.text =
-          '${pickedDate.year}-'
-          '${pickedDate.month.toString().padLeft(2, '0')}-'
-          '${pickedDate.day.toString().padLeft(2, '0')}';
+      _deadlineController.text = '${pickedDate.year}-${pickedDate.month.toString().padLeft(2, '0')}-${pickedDate.day.toString().padLeft(2, '0')}';
     });
   }
 
   @override
   Widget build(BuildContext context) {
+    final String headerImage = widget.preselectedImageUrl ?? _serviceImages[_selectedService] ?? '';
+    final String displayTitle = widget.preselectedTitle ?? _selectedService;
+
     return Scaffold(
+      backgroundColor: Colors.grey[50], 
       appBar: AppBar(
-        title: const Text('Place Your Order'), 
+        title: const Text('Place Your Order', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)), 
         backgroundColor: Colors.black,
         foregroundColor: Colors.white,
+        elevation: 0,
       ),
       drawer: MyDrawer(
-        onProfileTap: goToProfile,
-        onSignout: signOut,
-        onViewOrdersTap: goToOrders, 
-        onHomeTap: goToHome, 
-        onPlaceOrderTap: goToPlaceOrder, 
-        onServiceTap: goToServices,
-        onGalleryTap: goToGallery,
+        onProfileTap: goToProfile, onSignout: signOut, onViewOrdersTap: goToOrders, 
+        onHomeTap: goToHome, onPlaceOrderTap: goToPlaceOrder, onServiceTap: goToServices, onGalleryTap: goToGallery,
       ),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
+      body: Stack(
         children: [
-          const Text('Select a service', style: TextStyle(fontWeight: FontWeight.bold)),
-          const SizedBox(height: 5),
-          
-          DropdownButtonFormField<String>(
-            initialValue: _selectedService,
-            isExpanded: true,
-            decoration: const InputDecoration(
-              border: OutlineInputBorder(),
-              contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-            ),
-            items: _services.map((s) {
-              return DropdownMenuItem<String>(
-                value: s,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Expanded(
-                      child: Text(s, style: const TextStyle(fontSize: 15), overflow: TextOverflow.ellipsis),
+          // --- 1. BACKGROUND HERO IMAGE ---
+          if (headerImage.isNotEmpty)
+            Positioned(
+              top: 0,
+              left: 0,
+              right: 0,
+              child: Container(
+                height: 220,
+                decoration: BoxDecoration(
+                  image: DecorationImage(
+                    image: NetworkImage(headerImage),
+                    fit: BoxFit.cover,
+                  ),
+                ),
+                // Dark gradient to make the white title readable
+                child: Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [Colors.black.withOpacity(0.4), Colors.grey[50]!],
                     ),
-                    Container(
-                      width: 36,
-                      height: 36,
-                      margin: const EdgeInsets.only(left: 10),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(6),
-                        image: DecorationImage(
-                          // 5. FIXED: Using NetworkImage here
-                          image: NetworkImage(_serviceImages[s]!), 
-                          fit: BoxFit.cover,
+                  ),
+                ),
+              ),
+            ),
+
+          // --- 2. FOREGROUND FORM CARD ---
+          ListView(
+            padding: const EdgeInsets.only(top: 150), // Push form down over the image
+            children: [
+              Container(
+                margin: const EdgeInsets.symmetric(horizontal: 16),
+                padding: const EdgeInsets.all(24),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(24),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.05),
+                      blurRadius: 20,
+                      offset: const Offset(0, 10),
+                    )
+                  ],
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Title
+                    Text(
+                      displayTitle,
+                      style: const TextStyle(fontSize: 26, fontWeight: FontWeight.bold, color: Colors.black87),
+                    ),
+                    const SizedBox(height: 4),
+                    const Text('Fill in the details below to get started.', style: TextStyle(color: Colors.grey, fontSize: 14)),
+                    const SizedBox(height: 24),
+
+                    // SECTION: Service Category
+                    const Text('Service Category', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                    const SizedBox(height: 8),
+                    DropdownButtonFormField<String>(
+                      value: _selectedService,
+                      isExpanded: true,
+                      decoration: InputDecoration(
+                        filled: true,
+                        fillColor: Colors.grey[100],
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                      ),
+                      items: _services.map((s) {
+                        return DropdownMenuItem<String>(
+                          value: s,
+                          child: Row(
+                            children: [
+                              Container(
+                                width: 30,
+                                height: 30,
+                                margin: const EdgeInsets.only(right: 12),
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(6),
+                                  image: DecorationImage(image: NetworkImage(_serviceImages[s]!), fit: BoxFit.cover),
+                                ),
+                              ),
+                              Expanded(child: Text(s, style: const TextStyle(fontSize: 15))),
+                            ],
+                          ),
+                        );
+                      }).toList(),
+                      onChanged: (val) {
+                        if (val != null) setState(() => _selectedService = val);
+                      },
+                    ),
+                    
+                    const SizedBox(height: 20),
+
+                    // SECTION: Project Details
+                    const Text('Project Details', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                    const SizedBox(height: 8),
+                    TextField(
+                      controller: _titleController,
+                      decoration: InputDecoration(
+                        filled: true,
+                        fillColor: Colors.grey[100],
+                        prefixIcon: const Icon(Icons.edit_outlined, color: Colors.grey),
+                        hintText: 'Order Title / Brief Description',
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    TextField(
+                      controller: _qtyController,
+                      keyboardType: TextInputType.number, 
+                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                      decoration: InputDecoration(
+                        filled: true,
+                        fillColor: Colors.grey[100],
+                        prefixIcon: const Icon(Icons.numbers, color: Colors.grey),
+                        labelText: 'Quantity',
+                        // Beautiful Price Badge on the right
+                        suffixIcon: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: Colors.green.shade50,
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Text(
+                              _estimatedPrice,
+                              style: const TextStyle(color: Colors.green, fontWeight: FontWeight.bold, fontSize: 12),
+                            ),
+                          ),
                         ),
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                      ),
+                      onChanged: (value) => setState(() {}), 
+                    ),
+
+                    const SizedBox(height: 24),
+
+                    // SECTION: Deadline & Reference
+                    const Text('Timeline & Reference', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                    const SizedBox(height: 8),
+                    TextField(
+                      controller: _deadlineController,
+                      readOnly: true,
+                      onTap: _pickDeadline,
+                      decoration: InputDecoration(
+                        filled: true,
+                        fillColor: Colors.grey[100],
+                        prefixIcon: const Icon(Icons.calendar_today, color: Colors.grey),
+                        labelText: 'Order Deadline',
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+
+                    // Image Upload Area
+                    GestureDetector(
+                      onTap: _pickImage,
+                      child: Container(
+                        height: 140,
+                        width: double.infinity,
+                        decoration: BoxDecoration(
+                          color: Colors.grey[50],
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: Colors.grey.shade300, width: 2, style: BorderStyle.solid),
+                          image: _selectedImageBytes != null
+                              ? DecorationImage(image: MemoryImage(_selectedImageBytes!), fit: BoxFit.cover)
+                              : null,
+                        ),
+                        child: _selectedImageBytes == null
+                            ? Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.all(10),
+                                    decoration: BoxDecoration(color: Colors.white, shape: BoxShape.circle, boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 4)]),
+                                    child: const Icon(Icons.cloud_upload_outlined, size: 28, color: Colors.grey),
+                                  ),
+                                  const SizedBox(height: 10),
+                                  const Text('Tap to upload a reference picture', style: TextStyle(color: Colors.grey, fontSize: 13)),
+                                ],
+                              )
+                            : null, 
+                      ),
+                    ),
+                    
+                    const SizedBox(height: 30),
+
+                    // Submit Button
+                    SizedBox(
+                      width: double.infinity,
+                      height: 55,
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.black,
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          elevation: 2,
+                        ),
+                        onPressed: _isLoading ? null : _submitOrder,
+                        child: _isLoading 
+                          ? const CircularProgressIndicator(color: Colors.white)
+                          : const Text('Submit Order', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                       ),
                     ),
                   ],
                 ),
-              );
-            }).toList(),
-            onChanged: (val) {
-              if (val != null) {
-                setState(() {
-                  _selectedService = val;
-                });
-              }
-            },
-          ),
-          const SizedBox(height: 15),
-          
-          TextField(
-            controller: _titleController,
-            decoration: InputDecoration(
-              prefixIcon: const Icon(Icons.info_outline, color: Colors.black),
-              hintText: 'Order Title/ Brief Description',
-              filled: true,
-              fillColor: Colors.grey[200],
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide.none,
               ),
-            ),
-          ),
-          const SizedBox(height: 15),
-          
-          TextField(
-            controller: _qtyController,
-            keyboardType: TextInputType.number, 
-            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-            decoration: InputDecoration(
-              labelText: 'Quantity',
-              helperText: 'Estimated Price: $_estimatedPrice', 
-              helperStyle: const TextStyle(color: Colors.green, fontWeight: FontWeight.bold),
-              prefixIcon: const Icon(Icons.numbers, color: Colors.black),
-              filled: true,
-              fillColor: Colors.grey[200],
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide.none,
-              ),
-            ),
-            onChanged: (value) {
-              setState(() {}); 
-            },
-          ),
-          const SizedBox(height: 15),
-
-          TextField(
-            controller: _deadlineController,
-            readOnly: true,
-            onTap: _pickDeadline,
-            decoration: InputDecoration(
-              labelText: 'Order Deadline',
-              hintText: 'Select a deadline date',
-              prefixIcon: const Icon(Icons.calendar_month),
-              filled: true,
-              fillColor: Colors.grey[200],
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide.none,
-              ),
-            ),
-          ),
-          const SizedBox(height: 15),
-
-          const Text('Reference Image (Optional)', style: TextStyle(fontWeight: FontWeight.bold)),
-          const SizedBox(height: 8),
-          GestureDetector(
-            onTap: _pickImage,
-            child: Container(
-              height: 150,
-              width: double.infinity,
-              decoration: BoxDecoration(
-                color: Colors.grey[200],
-                borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: Colors.grey.shade400),
-              ),
-              // 6. FIXED: Use Image.memory for the preview
-              child: _selectedImageBytes != null
-                  ? ClipRRect(
-                      borderRadius: BorderRadius.circular(10),
-                      child: Image.memory(_selectedImageBytes!, fit: BoxFit.cover),
-                    )
-                  : const Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.add_photo_alternate, size: 50, color: Colors.grey),
-                        SizedBox(height: 8),
-                        Text('Tap to upload a reference picture', style: TextStyle(color: Colors.grey)),
-                      ],
-                    ),
-            ),
-          ),
-          
-          const SizedBox(height: 25),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.redAccent, 
-              padding: const EdgeInsets.all(15)
-            ),
-            onPressed: _isLoading ? null : _submitOrder,
-            child: _isLoading 
-              ? const CircularProgressIndicator(color: Colors.white)
-              : const Text('Submit Order', style: TextStyle(color: Colors.white)),
+              const SizedBox(height: 40),
+            ],
           ),
         ],
       ),

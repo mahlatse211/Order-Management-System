@@ -172,42 +172,24 @@ class _ProfilePageState extends State<ProfilePage> {
     }
   }
 
-  void goToProfile() {
-    Navigator.pop(context); 
-  }
-  
-  void goToOrders() {
-    Navigator.pop(context);
-    Navigator.push(context, MaterialPageRoute(builder: (context) => const CurrentOrdersScreen())); 
-  }
-
-  void goToHome() {
-    Navigator.pop(context);
-    Navigator.push(context, MaterialPageRoute(builder: (context) => const HomeScreen())); 
-  }
-
-  void goToPlaceOrder() {
-    Navigator.pop(context);
-    Navigator.push(context, MaterialPageRoute(builder: (context) => const NewOrderScreen())); 
-  }
-
-  void goToService() {
-    Navigator.pop(context);
-    Navigator.push(context, MaterialPageRoute(builder: (context) => const ServicesScreen())); 
-  }
-  void goToGallery() {
-    Navigator.pop(context);
-    Navigator.push(context, MaterialPageRoute(builder: (context) => const GalleryScreen())); 
-  }
+  // Navigation Methods
+  void goToProfile() => Navigator.pop(context); 
+  void goToOrders() { Navigator.pop(context); Navigator.push(context, MaterialPageRoute(builder: (context) => const CurrentOrdersScreen())); }
+  void goToHome() { Navigator.pop(context); Navigator.push(context, MaterialPageRoute(builder: (context) => const HomeScreen())); }
+  void goToPlaceOrder() { Navigator.pop(context); Navigator.push(context, MaterialPageRoute(builder: (context) => const NewOrderScreen())); }
+  void goToService() { Navigator.pop(context); Navigator.push(context, MaterialPageRoute(builder: (context) => const ServicesScreen())); }
+  void goToGallery() { Navigator.pop(context); Navigator.push(context, MaterialPageRoute(builder: (context) => const GalleryScreen())); }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       key: _scaffoldKey,
+      backgroundColor: Colors.grey[50],
       appBar: AppBar(
-        title: const Text('Profile Page', style: TextStyle(color: Colors.white)),
+        title: const Text('Profile', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
         backgroundColor: Colors.black,
         foregroundColor: Colors.white,
+        elevation: 0,
       ),
       drawer: MyDrawer(
         onProfileTap: goToProfile,
@@ -218,128 +200,236 @@ class _ProfilePageState extends State<ProfilePage> {
         onServiceTap: goToService, 
         onGalleryTap: goToGallery,
       ),
-      backgroundColor: Colors.grey[100],
-      body: _buildBody(const Color.fromARGB(255, 0, 0, 0)),
+      body: _buildBody(),
     );
   }
 
-  Widget _buildBody(Color headerColor) {
+  Widget _buildBody() {
     if (_isLoading) return const Center(child: CircularProgressIndicator());
     if (_errorMessage != null) return Center(child: Text('Error: $_errorMessage', style: const TextStyle(color: Colors.red)));
 
     return SingleChildScrollView(
       child: Column(
         children: [
-          // --- TOP HEADER ---
+          // --- 1. HERO HEADER ---
           Container(
             width: double.infinity,
-            decoration: BoxDecoration(
-              color: headerColor,
-              borderRadius: const BorderRadius.only(bottomLeft: Radius.circular(20), bottomRight: Radius.circular(20)),
+            padding: const EdgeInsets.only(left: 20, right: 20, top: 20, bottom: 40),
+            decoration: const BoxDecoration(
+              color: Colors.black,
+              borderRadius: BorderRadius.only(bottomLeft: Radius.circular(30), bottomRight: Radius.circular(30)),
             ),
-            padding: const EdgeInsets.only(left: 20, right: 20, bottom: 20, top: 20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            child: Row(
               children: [
-                const Text('Your account', style: TextStyle(color: Colors.white70, fontSize: 14)),
-                const SizedBox(height: 5),
-                Text(_nameController.text.isNotEmpty ? _nameController.text : 'User Name', style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold)),
-                const SizedBox(height: 20),
-                GestureDetector(
-                  onTap: goToOrders, 
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                    decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(10)),
-                    child: Row(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(color: Colors.amber[100], borderRadius: BorderRadius.circular(8)),
-                          child: const Icon(Icons.shopping_bag, color: Colors.orange),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Text('Your Orders', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.black)),
-                              Text('$_orderCount active orders', style: TextStyle(color: Colors.grey[600], fontSize: 13)),
-                            ],
-                          ),
-                        ),
-                        const Icon(Icons.chevron_right, color: Colors.grey),
-                      ],
-                    ),
+                // Avatar
+                Container(
+                  padding: const EdgeInsets.all(3),
+                  decoration: const BoxDecoration(
+                    color: Colors.white24,
+                    shape: BoxShape.circle,
                   ),
-                )
+                  child: const CircleAvatar(
+                    radius: 35,
+                    backgroundColor: Colors.white10,
+                    child: Icon(Icons.person, size: 40, color: Colors.white),
+                  ),
+                ),
+                const SizedBox(width: 16),
+                // Name & Email
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        _nameController.text.isNotEmpty ? _nameController.text : 'User Name',
+                        style: const TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        currentUser?.email ?? 'No Email',
+                        style: const TextStyle(color: Colors.white54, fontSize: 13),
+                      ),
+                    ],
+                  ),
+                ),
               ],
             ),
           ),
 
-          // --- GENERAL MENU LIST ---
+          // --- 2. FLOATING ORDER CARD ---
+          Transform.translate(
+            offset: const Offset(0, -25),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: GestureDetector(
+                onTap: goToOrders,
+                child: Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(20),
+                    boxShadow: [
+                      BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 15, offset: const Offset(0, 8)),
+                    ],
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.orange.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: const Icon(Icons.shopping_bag, color: Colors.orange),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text('Your Orders', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.black87)),
+                            const SizedBox(height: 2),
+                            Text('$_orderCount active orders', style: TextStyle(color: Colors.grey[500], fontSize: 13)),
+                          ],
+                        ),
+                      ),
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(color: Colors.grey[100], shape: BoxShape.circle),
+                        child: const Icon(Icons.arrow_forward_ios, size: 14, color: Colors.black87),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+
+          // --- 3. SETTINGS SECTION ---
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 20.0),
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Center(child: Text('Logged in as: ${currentUser?.email ?? "No Email"}', style: const TextStyle(color: Colors.grey, fontSize: 13))),
-                const SizedBox(height: 10),
-                const Text('General', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.black)),
-                const Divider(),
+                const Text('General', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: Colors.black87)),
+                const SizedBox(height: 12),
 
-                ExpansionTile(
-                  leading: Icon(Icons.person_outline, color: Colors.blue[800]),
-                  title: const Text('Account details'),
-                  childrenPadding: const EdgeInsets.all(16),
-                  children: [
-                    TextField(controller: _nameController, decoration: const InputDecoration(labelText: 'Full Name', border: OutlineInputBorder())),
-                    const SizedBox(height: 20),
-                    TextField(controller: _emailController, readOnly: true, decoration: const InputDecoration(labelText: 'Email (Read-only)', border: OutlineInputBorder(), filled: true, fillColor: Colors.black12)),
-                    const SizedBox(height: 20),
-                    TextField(controller: _phoneController, keyboardType: TextInputType.phone, decoration: const InputDecoration(labelText: 'Phone Number', border: OutlineInputBorder())),
-                    const SizedBox(height: 20),
-                    ElevatedButton(
-                      style: ElevatedButton.styleFrom(backgroundColor: Colors.blue[800], minimumSize: const Size(double.infinity, 45)),
-                      onPressed: _isSaving ? null : _saveAccountDetails,
-                      child: _isSaving ? const CircularProgressIndicator(color: Colors.white) : const Text('Save Account Details', style: TextStyle(color: Colors.white)),
-                    )
-                  ],
+                // Custom Expansion Tile for Account Details
+                Container(
+                  margin: const EdgeInsets.only(bottom: 12),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 10, offset: const Offset(0, 4))],
+                  ),
+                  child: Theme(
+                    data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+                    child: ExpansionTile(
+                      leading: Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(color: Colors.blue.withOpacity(0.1), borderRadius: BorderRadius.circular(10)),
+                        child: const Icon(Icons.person_outline, color: Colors.blue),
+                      ),
+                      title: const Text('Account details', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15)),
+                      iconColor: Colors.black,
+                      collapsedIconColor: Colors.grey,
+                      childrenPadding: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
+                      children: [
+                        TextField(controller: _nameController, decoration: const InputDecoration(labelText: 'Full Name', border: OutlineInputBorder())),
+                        const SizedBox(height: 12),
+                        TextField(controller: _emailController, readOnly: true, decoration: const InputDecoration(labelText: 'Email (Read-only)', border: OutlineInputBorder(), filled: true, fillColor: Colors.black12)),
+                        const SizedBox(height: 12),
+                        TextField(controller: _phoneController, keyboardType: TextInputType.phone, decoration: const InputDecoration(labelText: 'Phone Number', border: OutlineInputBorder())),
+                        const SizedBox(height: 16),
+                        SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(backgroundColor: Colors.black, foregroundColor: Colors.white, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)), padding: const EdgeInsets.symmetric(vertical: 14)),
+                            onPressed: _isSaving ? null : _saveAccountDetails,
+                            child: _isSaving ? const CircularProgressIndicator(color: Colors.white) : const Text('Save Changes', style: TextStyle(fontWeight: FontWeight.bold)),
+                          ),
+                        )
+                      ],
+                    ),
+                  ),
                 ),
 
-                ExpansionTile(
-                  leading: Icon(Icons.phone_outlined, color: Colors.blue[800]),
-                  title: const Text('Contact details'),
-                  children: [
-                    ListTile(title: const Text('Email'), subtitle: Text(currentUser?.email ?? 'N/A'), leading: const Icon(Icons.email)),
-                    const SizedBox(height: 15),
-                    ListTile(title: const Text('Phone Number'), subtitle: Text(_phoneController.text.isNotEmpty ? _phoneController.text : 'Not provided'), leading: const Icon(Icons.phone)),
-                  ],
+                // Custom Expansion Tile for Contact Details
+                Container(
+                  margin: const EdgeInsets.only(bottom: 12),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 10, offset: const Offset(0, 4))],
+                  ),
+                  child: Theme(
+                    data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+                    child: ExpansionTile(
+                      leading: Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(color: Colors.green.withOpacity(0.1), borderRadius: BorderRadius.circular(10)),
+                        child: const Icon(Icons.phone_outlined, color: Colors.green),
+                      ),
+                      title: const Text('Contact details', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15)),
+                      iconColor: Colors.black,
+                      collapsedIconColor: Colors.grey,
+                      childrenPadding: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
+                      children: [
+                        ListTile(contentPadding: EdgeInsets.zero, title: const Text('Email', style: TextStyle(color: Colors.grey, fontSize: 12)), subtitle: Text(currentUser?.email ?? 'N/A', style: const TextStyle(color: Colors.black87, fontSize: 15))),
+                        const Divider(),
+                        ListTile(contentPadding: EdgeInsets.zero, title: const Text('Phone Number', style: TextStyle(color: Colors.grey, fontSize: 12)), subtitle: Text(_phoneController.text.isNotEmpty ? _phoneController.text : 'Not provided', style: const TextStyle(color: Colors.black87, fontSize: 15))),
+                      ],
+                    ),
+                  ),
                 ),
 
-                ListTile(
-                  leading: Icon(Icons.lock_outline, color: Colors.blue[800]),
-                  title: const Text('Change Password'),
-                  trailing: const Icon(Icons.chevron_right, color: Colors.grey),
-                  onTap: _showPasswordDialog,
+                // Change Password List Tile
+                Container(
+                  margin: const EdgeInsets.only(bottom: 24),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 10, offset: const Offset(0, 4))],
+                  ),
+                  child: ListTile(
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                    leading: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(color: Colors.purple.withOpacity(0.1), borderRadius: BorderRadius.circular(10)),
+                      child: const Icon(Icons.lock_outline, color: Colors.purple),
+                    ),
+                    title: const Text('Change Password', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15)),
+                    trailing: const Icon(Icons.chevron_right, color: Colors.grey),
+                    onTap: _showPasswordDialog,
+                  ),
                 ),
-                
-                const Divider(),
-                const SizedBox(height: 80),
+
+                // Privacy Text
                 Center(
-                  child: Text('You own your data. \nWe do not share your account details or \napp activity with unauthorized third parties.', textAlign: TextAlign.center, style: TextStyle(color: Colors.grey[600], fontSize: 12)),
+                  child: Text(
+                    'You own your data.\nWe do not share your account details or\napp activity with unauthorized third parties.', 
+                    textAlign: TextAlign.center, 
+                    style: TextStyle(color: Colors.grey[400], fontSize: 12, height: 1.5),
+                  ),
                 ),
-                const Divider(),
-                const SizedBox(height: 20),
+                const SizedBox(height: 30),
 
+                // Sign Out Button
                 SizedBox(
                   width: double.infinity,
-                  child: OutlinedButton.icon(
-                    style: OutlinedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 14), side: const BorderSide(color: Colors.red), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
+                  child: ElevatedButton.icon(
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 16), 
+                      backgroundColor: Colors.black,
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))
+                    ),
                     onPressed: signOut,
-                    icon: const Icon(Icons.logout, color: Colors.red),
-                    label: const Text('Sign Out', style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold, fontSize: 16)),
+                    icon: const Icon(Icons.logout, size: 20),
+                    label: const Text('Sign Out', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
                   ),
-                )
+                ),
+                const SizedBox(height: 40),
               ],
             ),
           ),

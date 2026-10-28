@@ -17,17 +17,16 @@ class ServicesScreen extends StatefulWidget {
 
 class _ServicesScreenState extends State<ServicesScreen> {
   
-  // 1. Fetch data from the 'portfolio' table that your ASP.NET app writes to
   Future<List<Map<String, dynamic>>> _fetchPortfolio() async {
     final response = await Supabase.instance.client
         .from('portfolio')
         .select()
-        .order('created_at', ascending: false); // Newest first
+        .order('created_at', ascending: false); 
         
     return List<Map<String, dynamic>>.from(response);
   }
 
-  // Navigation methods
+  // Navigation Methods
   void goToProfile(BuildContext context) {
     Navigator.pop(context);
     Navigator.push(context, MaterialPageRoute(builder: (context) => const ProfilePage())); 
@@ -47,13 +46,14 @@ class _ServicesScreenState extends State<ServicesScreen> {
     Navigator.pop(context);
     Navigator.push(context, MaterialPageRoute(builder: (context) => const NewOrderScreen())); 
   }
-  void goToGallery() {
+  
+  void goToGallery(BuildContext context) {
     Navigator.pop(context);
     Navigator.push(context, MaterialPageRoute(builder: (context) => const GalleryScreen())); 
   }
   
   void goToService(BuildContext context) {
-    Navigator.pop(context); // Already here
+    Navigator.pop(context); 
   }
 
   Future<void> signOut(BuildContext context) async {
@@ -69,17 +69,16 @@ class _ServicesScreenState extends State<ServicesScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.grey[100], // Light background
       appBar: AppBar(
-        title: const Text('Our Services', style: TextStyle(color: Colors.white)),
+        title: const Text('Our Services', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
         backgroundColor: Colors.black,
         foregroundColor: Colors.white,
+        elevation: 0,
         actions: [
-          // Add a refresh button so customers can pull the latest ASP.NET updates
           IconButton(
             icon: const Icon(Icons.refresh),
-            onPressed: () {
-              setState(() {}); // Triggers the FutureBuilder to re-fetch
-            },
+            onPressed: () => setState(() {}), 
           )
         ],
       ),
@@ -90,9 +89,8 @@ class _ServicesScreenState extends State<ServicesScreen> {
         onHomeTap: () => goToHome(context), 
         onPlaceOrderTap: () => goToPlaceOrder(context), 
         onServiceTap: () => goToService(context),
-        onGalleryTap: goToGallery,
+        onGalleryTap: () => goToGallery(context),
       ),
-      // 2. FutureBuilder to handle the loading of ASP.NET data
       body: FutureBuilder<List<Map<String, dynamic>>>(
         future: _fetchPortfolio(),
         builder: (context, snapshot) {
@@ -121,39 +119,52 @@ class _ServicesScreenState extends State<ServicesScreen> {
             itemBuilder: (context, index) {
               final item = portfolioItems[index];
               
-              // 3. Extract data matching your exact Supabase columns
               final title = item['title'] ?? 'Service';
               final category = item['category'] ?? 'General';
               final imageUrl = item['image_url'] ?? ''; 
               final price = item['price']?.toString() ?? '0';
 
-              return Card(
-                elevation: 3,
-                margin: const EdgeInsets.only(bottom: 20.0),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                clipBehavior: Clip.antiAlias, 
-                child: InkWell(
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 20.0),
+                child: _HoverScaleCard(
                   onTap: () {
-                    // Pass the 'category' (e.g., Logo Design) to the NewOrderScreen
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => NewOrderScreen(preselectedService: category),
+                        builder: (context) => NewOrderScreen(
+                          preselectedService: category,
+                          preselectedImageUrl: imageUrl, 
+                          preselectedTitle: title,
+                        ),
                       ),
                     );
                   },
-                  child: SizedBox(
-                    height: 130, 
-                    child: Row(
-                      children: [
-                        // --- LEFT SIDE: IMAGE FROM ASP.NET ---
-                        SizedBox(
-                          width: 130, 
-                          height: double.infinity,
-                          child: imageUrl.isNotEmpty 
+                  child: Container(
+                    height: 160, // Slightly taller for the new layout
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(24),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.08),
+                          blurRadius: 15,
+                          offset: const Offset(0, 8),
+                        )
+                      ],
+                    ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(24),
+                      child: Stack(
+                        fit: StackFit.expand,
+                        children: [
+                          // --- 1. BACKGROUND IMAGE ---
+                          imageUrl.isNotEmpty 
                             ? Image.network(
                                 imageUrl,
                                 fit: BoxFit.cover,
+                                errorBuilder: (context, error, stackTrace) => Container(
+                                  color: Colors.grey[300],
+                                  child: const Icon(Icons.image_not_supported, color: Colors.grey),
+                                ),
                                 loadingBuilder: (context, child, loadingProgress) {
                                   if (loadingProgress == null) return child;
                                   return Container(
@@ -161,63 +172,102 @@ class _ServicesScreenState extends State<ServicesScreen> {
                                     child: const Center(child: CircularProgressIndicator()),
                                   );
                                 },
-                                errorBuilder: (context, error, stackTrace) {
-                                  return Container(
-                                    color: Colors.grey[300],
-                                    child: const Icon(Icons.image_not_supported, color: Colors.grey),
-                                  );
-                                },
                               )
                             : Container(
                                 color: Colors.grey[300],
                                 child: const Icon(Icons.image, color: Colors.grey, size: 40),
                               ),
-                        ),
-                        
-                        // --- RIGHT SIDE: TEXT & PRICE ---
-                        Expanded(
-                          child: Padding(
-                            padding: const EdgeInsets.all(12.0),
+                          
+                          // --- 2. GRADIENT OVERLAY ---
+                          Container(
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                begin: Alignment.topCenter,
+                                end: Alignment.bottomCenter,
+                                colors: [
+                                  Colors.transparent,
+                                  Colors.black.withOpacity(0.85),
+                                ],
+                                stops: const [0.4, 1.0],
+                              ),
+                            ),
+                          ),
+
+                          // --- 3. TEXT CONTENT ---
+                          Positioned(
+                            left: 16,
+                            right: 16,
+                            bottom: 16,
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
-                              mainAxisAlignment: MainAxisAlignment.center,
                               children: [
+                                // Category Pill
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white.withOpacity(0.2),
+                                    borderRadius: BorderRadius.circular(8),
+                                    border: Border.all(color: Colors.white.withOpacity(0.5)),
+                                  ),
+                                  child: Text(
+                                    category.toUpperCase(),
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.bold,
+                                      letterSpacing: 1,
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                
+                                // Title
                                 Text(
                                   title,
                                   style: const TextStyle(
                                     fontWeight: FontWeight.bold, 
-                                    fontSize: 18,
-                                    color: Colors.black87,
+                                    fontSize: 22,
+                                    color: Colors.white,
+                                    shadows: [
+                                      Shadow(
+                                        color: Colors.black45,
+                                        blurRadius: 4,
+                                        offset: Offset(0, 2),
+                                      )
+                                    ],
                                   ),
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                 ),
                                 const SizedBox(height: 4),
-                                Text(
-                                  category, // Showing the category instead of description
-                                  style: TextStyle(fontSize: 12, color: Colors.grey[600]),
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                                const SizedBox(height: 8),
-                                Text(
-                                  'From $price',
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 14,
-                                    color: Colors.green,
-                                  ),
+                                
+                                // Price Row with Arrow
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      'From $price',
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: 16,
+                                        color: Colors.greenAccent, // Brighter green
+                                      ),
+                                    ),
+                                    Container(
+                                      padding: const EdgeInsets.all(6),
+                                      decoration: BoxDecoration(
+                                        color: Colors.white,
+                                        shape: BoxShape.circle,
+                                      ),
+                                      child: const Icon(Icons.arrow_forward_ios, size: 14, color: Colors.black),
+                                    ),
+                                  ],
                                 ),
                               ],
                             ),
                           ),
-                        ),
-                        
-                        const Padding(
-                          padding: EdgeInsets.only(right: 12.0),
-                          child: Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
                 ),
@@ -225,6 +275,37 @@ class _ServicesScreenState extends State<ServicesScreen> {
             },
           );
         },
+      ),
+    );
+  }
+}
+
+// --- NEW WIDGET: Adds a subtle scale animation when tapped ---
+class _HoverScaleCard extends StatefulWidget {
+  final Widget child;
+  final VoidCallback onTap;
+
+  const _HoverScaleCard({required this.child, required this.onTap});
+
+  @override
+  State<_HoverScaleCard> createState() => _HoverScaleCardState();
+}
+
+class _HoverScaleCardState extends State<_HoverScaleCard> {
+  bool _isPressed = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTapDown: (_) => setState(() => _isPressed = true),
+      onTapUp: (_) => setState(() => _isPressed = false),
+      onTapCancel: () => setState(() => _isPressed = false),
+      onTap: widget.onTap,
+      child: AnimatedScale(
+        scale: _isPressed ? 0.97 : 1.0, // Shrinks slightly when pressed
+        duration: const Duration(milliseconds: 150),
+        curve: Curves.easeOut,
+        child: widget.child,
       ),
     );
   }
