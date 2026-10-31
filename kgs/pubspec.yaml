@@ -122,14 +122,67 @@
 #   flutter:
 #   assets:
 #     - assets/logo.jpeg
+# name: kgs
+# description: "A new Flutter project."
+# publish_to: 'none'
+
+# version: 1.0.0+1
+
+# environment:
+#   sdk: '>=3.0.0 <4.0.0'
+
+# # dependencies:
+# #   flutter:
+# #     sdk: flutter
+
+# #   cupertino_icons: ^1.0.8
+# #   supabase_flutter: ^2.15.4
+# #   provider: ^6.1.5+1
+# #   image_picker: ^1.2.1
+# #   pdf: ^3.13.1
+# #   intl: ^0.20.3
+# #   printing: ^5.15.1
+  
+ 
+
+# dependencies:
+#   flutter:
+#     sdk: flutter
+#      supabase_flutter: ^2.0.0 (or your required version)
+#   pdf: ^3.10.0 # (or latest version)
+#   printing: ^5.11.0 # (or latest version)
+#   intl: ^0.18.0 # (or latest version)
+# dev_dependencies:
+#   flutter_test:
+#     sdk: flutter
+#   flutter_lints: ^6.0.0
+
+
+# flutter:
+#   uses-material-design: true
+
+#   assets:
+    
+#     - assets/logo.jpeg
+#     - assets/Logo2.jpeg
+#     - assets/Brand Design.jpeg
+#     - assets/Flyer.jpeg
+#     - assets/Event Poster.jpeg
+#     - assets/EventProm1.jpeg
+#     - assets/WebD.jpeg
+#     - assets/DigD.jpeg
+#     - assets/DigD2.jpeg
+
 name: kgs
-description: "A new Flutter project."
+description: "Katliey Graphics Solutions Order Management System"
 publish_to: 'none'
 
 version: 1.0.0+1
 
+# environment:
+#   sdk: '>=3.47.9 <4.0.0'
 environment:
-  sdk: '>=3.0.0 <4.0.0'
+  sdk: ">=3.12.0 <4.0.0"
 
 dependencies:
   flutter:
@@ -142,24 +195,68 @@ dependencies:
   pdf: ^3.13.1
   intl: ^0.20.3
   printing: ^5.15.1
-  
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^6.0.0
 
+dependency_overrides:
+  image: "4.10.0"
+  
 flutter:
   uses-material-design: true
 
   assets:
-    
     - assets/logo.jpeg
     - assets/Logo2.jpeg
     - assets/Brand Design.jpeg
     - assets/Flyer.jpeg
-    - assets/Event Poster.jpeg
+    - assets/Event poster.jpeg
     - assets/EventProm1.jpeg
     - assets/WebD.jpeg
     - assets/DigD.jpeg
     - assets/DigD2.jpeg
+
+
+#     name: kgs
+# description: "Katliey Graphics Solutions Order Management System"
+# publish_to: 'none'
+
+# version: 1.0.0+1
+
+# environment:
+#   sdk: ">=3.12.0 <4.0.0"
+
+# dependencies:
+#   flutter:
+#     sdk: flutter
+
+#   cupertino_icons: ^1.0.8
+#   supabase_flutter: ^2.15.4
+#   provider: ^6.1.5+1
+#   image_picker: ^1.2.1
+#   pdf: ^3.13.1
+#   intl: ^0.20.3
+#   printing: ^5.15.1
+
+# dev_dependencies:
+#   flutter_test:
+#     sdk: flutter
+#   flutter_lints: ^6.0.0
+
+
+
+# flutter:
+#   uses-material-design: true
+
+#   assets:
+#     - assets/logo.jpeg
+#     - assets/Logo2.jpeg
+#     - assets/Brand Design.jpeg
+#     - assets/Flyer.jpeg
+#     - assets/Event poster.jpeg
+#     - assets/EventProm1.jpeg
+#     - assets/WebD.jpeg
+#     - assets/DigD.jpeg
+#     - assets/DigD2.jpeg

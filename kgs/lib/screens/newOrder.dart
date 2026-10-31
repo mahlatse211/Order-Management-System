@@ -43,7 +43,7 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
   Uint8List? _selectedImageBytes; 
   final ImagePicker _picker = ImagePicker();
 
-  final List<String> _services = ['Logo Design', 'Brand Design', 'Website Design', 'Event Promotion', 'Print Design', 'Digital Design'];
+  final List<String> _services = ['Logo Design', 'Brand Design', 'Website Design', 'Event Promotion', 'Print Design', 'Digital Design','Other'];
 
   final Map<String, String> _serviceImages = {
     'Logo Design': 'https://images.unsplash.com/photo-1626785774573-4b799315345d?q=80&w=100&auto=format&fit=crop',
@@ -52,6 +52,7 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
     'Event Promotion': 'https://images.unsplash.com/photo-1558655146-d09347e92766?q=80&w=100&auto=format&fit=crop',
     'Print Design': 'https://images.unsplash.com/photo-1611162617474-5b21e879e113?q=80&w=100&auto=format&fit=crop',
     'Digital Design': 'https://images.unsplash.com/photo-1572044162444-ad60f128bdea?q=80&w=100&auto=format&fit=crop',
+    'Other':'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSulGAgS-jSyvnHkkJmEVkRB356kJjJ0I-Ejsb2fzhPFw&s=10',
   };
 
   final Map<String, Map<String, int>> _serviceRates = {
@@ -236,7 +237,7 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
                     gradient: LinearGradient(
                       begin: Alignment.topCenter,
                       end: Alignment.bottomCenter,
-                      colors: [Colors.black.withOpacity(0.4), Colors.grey[50]!],
+                      colors: [Colors.black.withValues(alpha: 0.4), Colors.grey[50]!],
                     ),
                   ),
                 ),
@@ -255,7 +256,7 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
                   borderRadius: BorderRadius.circular(24),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
+                      color: Colors.black.withValues(alpha: 0.05),
                       blurRadius: 20,
                       offset: const Offset(0, 10),
                     )
@@ -277,7 +278,7 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
                     const Text('Service Category', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
                     const SizedBox(height: 8),
                     DropdownButtonFormField<String>(
-                      value: _selectedService,
+                      initialValue: _selectedService,
                       isExpanded: true,
                       decoration: InputDecoration(
                         filled: true,
@@ -393,7 +394,7 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
                                 children: [
                                   Container(
                                     padding: const EdgeInsets.all(10),
-                                    decoration: BoxDecoration(color: Colors.white, shape: BoxShape.circle, boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 4)]),
+                                    decoration: BoxDecoration(color: Colors.white, shape: BoxShape.circle, boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 4)]),
                                     child: const Icon(Icons.cloud_upload_outlined, size: 28, color: Colors.grey),
                                   ),
                                   const SizedBox(height: 10),
